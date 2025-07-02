@@ -1,0 +1,308 @@
+'''<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eternal Return 상세 전적 검색</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+        
+        :root {
+            --color-win-bg: #ecf2ff;
+            --color-win-border: #a9c7ff;
+            --color-lose-bg: #fff0f0;
+            --color-lose-border: #ffc9c9;
+            --color-top3-bg: #f1f8f0;
+            --color-top3-border: #b4e0a7;
+            --color-text-primary: #212529;
+            --color-text-secondary: #495057;
+            --color-text-kda-kills: #bf360c;
+            --color-text-kda-deaths: #d32f2f;
+            --color-text-kda-assists: #455a64;
+            --color-border: #dee2e6;
+            --color-background: #f8f9fa;
+            --color-white: #ffffff;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--color-background);
+            color: var(--color-text-primary);
+        }
+
+        .container {
+            background: var(--color-white);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: 500;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+
+        #status {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+            min-height: 24px;
+        }
+
+        .match-history {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .match-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-left-width: 5px;
+            border-radius: 4px;
+            background-color: var(--color-white);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .match-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        .match-item.win { border-left-color: var(--color-win-border); background-color: var(--color-win-bg); }
+        .match-item.top3 { border-left-color: var(--color-top3-border); background-color: var(--color-top3-bg); }
+        .match-item.lose { border-left-color: var(--color-lose-border); background-color: var(--color-lose-bg); }
+        
+        .match-item .character-img { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; }
+        .match-item .game-rank { font-size: 1.5rem; font-weight: 700; margin-right: 15px; min-width: 40px; text-align: center; }
+        .match-item .kda { font-size: 1rem; font-weight: 500; }
+        .match-item .kda .kills { color: var(--color-text-kda-kills); }
+        .match-item .kda .deaths { color: var(--color-text-kda-deaths); }
+        .match-item .kda .assists { color: var(--color-text-kda-assists); }
+        .match-item .game-info { font-size: 0.85rem; color: var(--color-text-secondary); margin-left: auto; text-align: right; }
+
+        #match-details {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            background: var(--color-white);
+            box-shadow: var(--shadow);
+            display: none; /* Initially hidden */
+        }
+        #match-details h2 { margin-top: 0; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .stat-item {
+            background: var(--color-background);
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #007bff;
+        }
+        .stat-item .label { font-weight: 500; }
+        .stat-item .value { float: right; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Eternal Return 상세 전적 검색</h1>
+        <div class="input-group">
+            <input type="password" id="apiKey" placeholder="X-Api-Key를 입력하세요">
+        </div>
+        <div class="input-group">
+            <input type="text" id="nickname" placeholder="검색할 닉네임을 입력하세요">
+        </div>
+        <button id="searchButton">전적 검색</button>
+    </div>
+
+    <div id="status"></div>
+
+    <div class="container" id="results-container" style="display: none;">
+        <div class="match-history" id="match-history"></div>
+        <div id="match-details"></div>
+    </div>
+
+    <script>
+        // --- DATA MAPPING ---
+        // API는 캐릭터 이름을 제공하지 않으므로, 주요 캐릭터 코드와 영문 이름을 매핑합니다.
+        // 이미지 URL을 만들기 위해 필요합니다.
+        const CHARACTER_DATA = {
+            1: { name: "Jackie", kr: "재키" }, 2: { name: "Aya", kr: "아야" }, 3: { name: "Hyunwoo", kr: "현우" },
+            4: { name: "Magnus", kr: "매그너스" }, 5: { name: "Fiora", kr: "피오라" }, 6: { name: "Nadine", kr: "나딘" },
+            7: { name: "Zahir", kr: "자히르" }, 8: { name: "Hart", kr: "하트" }, 9: { name: "Isol", kr: "아이솔" },
+            10: { name: "LiDailin", kr: "리 다이린" }, 11: { name: "Yuki", kr: "유키" }, 12: { name: "Hyejin", kr: "혜진" },
+            13: { name: "Xiukai", kr: "쇼우" }, 14: { name: "Chiara", kr: "키아라" }, 15: { name: "Sissela", kr: "시셀라" },
+            16: { name: "Silvia", kr: "실비아" }, 17: { name: "Adriana", kr: "아드리아나" }, 18: { name: "Shoichi", kr: "쇼이치" },
+            19: { name: "Emma", kr: "엠마" }, 20: { name: "Lenox", kr: "레녹스" }, 21: { name: "Rozzi", kr: "로지" },
+            22: { name: "Luke", kr: "루크" }, 23: { name: "Cathy", kr: "캐시" }, 24: { name: "Adela", kr: "아델라" },
+            25: { name: "Bernice", kr: "버니스" }, 26: { name: "Barbara", kr: "바바라" }
+            // ... more characters can be added here
+        };
+        const TEAM_MODE_MAP = { 1: "솔로", 2: "듀오", 3: "스쿼드" };
+
+        // --- DOM ELEMENTS ---
+        const searchButton = document.getElementById('searchButton');
+        const nicknameInput = document.getElementById('nickname');
+        const apiKeyInput = document.getElementById('apiKey');
+        const statusDiv = document.getElementById('status');
+        const resultsContainer = document.getElementById('results-container');
+        const matchHistoryDiv = document.getElementById('match-history');
+        const matchDetailsDiv = document.getElementById('match-details');
+
+        const API_BASE_URL = 'https://open-api.bser.io/v1';
+
+        // --- API CALL LOGIC ---
+        async function fetchApi(endpoint, apiKey) {
+            const url = `${API_BASE_URL}/${endpoint}`;
+            const response = await fetch(url, { headers: { 'x-api-key': apiKey, 'Accept': 'application/json' } });
+            const data = await response.json();
+            if (!response.ok) throw new Error(`[${data.code}] ${data.message}`);
+            return data;
+        }
+
+        // --- MAIN SEARCH FUNCTION ---
+        searchButton.addEventListener('click', async () => {
+            const nickname = nicknameInput.value.trim();
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey || !nickname) {
+                statusDiv.textContent = 'API 키와 닉네임을 모두 입력해주세요.';
+                return;
+            }
+
+            searchButton.disabled = true;
+            statusDiv.textContent = '유저 정보 검색 중...';
+            resultsContainer.style.display = 'none';
+            matchHistoryDiv.innerHTML = '';
+            matchDetailsDiv.style.display = 'none';
+
+            try {
+                // 1. Get userNum from nickname
+                const userData = await fetchApi(`user/nickname?query=${nickname}`, apiKey);
+                const userNum = userData.user.userNum;
+                statusDiv.textContent = `최근 게임 기록을 불러오는 중...`;
+
+                // 2. Get recent games
+                const gameData = await fetchApi(`user/games/${userNum}`, apiKey);
+                if (gameData.userGames && gameData.userGames.length > 0) {
+                    displayMatchHistory(gameData.userGames);
+                    resultsContainer.style.display = 'block';
+                    statusDiv.textContent = `최근 ${gameData.userGames.length}개의 게임 기록을 찾았습니다.`;
+                } else {
+                    statusDiv.textContent = '최근 게임 기록이 없습니다.';
+                }
+            } catch (error) {
+                statusDiv.textContent = `오류: ${error.message}`;
+            } finally {
+                searchButton.disabled = false;
+            }
+        });
+        
+        // --- UI RENDERING ---
+        function displayMatchHistory(games) {
+            games.forEach(game => {
+                const matchItem = document.createElement('div');
+                matchItem.className = 'match-item';
+
+                if (game.gameRank === 1) matchItem.classList.add('win');
+                else if (game.gameRank <= 3) matchItem.classList.add('top3');
+                else matchItem.classList.add('lose');
+
+                const character = CHARACTER_DATA[game.characterNum] || { name: 'Unknown', kr: '알 수 없음' };
+                // Using a community CDN for character images
+                const imageUrl = `https://static.bigbrain.gg/assets/images/er/characters/mini/${character.name}.png`;
+
+                const gameDuration = Math.floor(game.playTime / 60);
+                const gameMode = TEAM_MODE_MAP[game.matchingTeamMode] || '기타';
+
+                matchItem.innerHTML = `
+                    <img src="${imageUrl}" alt="${character.kr}" class="character-img" onerror="this.style.display='none'">
+                    <div class="game-rank">#${game.gameRank}</div>
+                    <div class="kda">
+                        <span class="kills">${game.playerKill}</span> K / 
+                        <span class="deaths">${game.playerDeaths}</span> D / 
+                        <span class="assists">${game.playerAssistant}</span> A
+                    </div>
+                    <div class="game-info">
+                        <div>${gameMode}</div>
+                        <div>${gameDuration}분</div>
+                    </div>
+                `;
+                
+                matchItem.addEventListener('click', () => displayMatchDetails(game, character, imageUrl));
+                matchHistoryDiv.appendChild(matchItem);
+            });
+        }
+
+        function displayMatchDetails(game, character, imageUrl) {
+            matchDetailsDiv.style.display = 'block';
+            matchDetailsDiv.innerHTML = `
+                <h2>${character.kr} (#${game.gameRank}) - 상세 스탯</h2>
+                <div class="stats-grid">
+                    <div class="stat-item"><span class="label">최대 체력</span><span class="value">${game.maxHp}</span></div>
+                    <div class="stat-item"><span class="label">최대 스태미나</span><span class="value">${game.maxSp}</span></div>
+                    <div class="stat-item"><span class="label">공격력</span><span class="value">${game.attackPower}</span></div>
+                    <div class="stat-item"><span class="label">방어력</span><span class="value">${game.defense}</span></div>
+                    <div class="stat-item"><span class="label">공격 속도</span><span class="value">${game.attackSpeed.toFixed(2)}</span></div>
+                    <div class="stat-item"><span class="label">이동 속도</span><span class="value">${game.moveSpeed.toFixed(2)}</span></div>
+                    <div class="stat-item"><span class="label">체력 재생</span><span class="value">${game.hpRegen.toFixed(2)}</span></div>
+                    <div class="stat-item"><span class="label">스태미나 재생</span><span class="value">${game.spRegen.toFixed(2)}</span></div>
+                    <div class="stat-item"><span class="label">모든 피해 흡혈</span><span class="value">${(game.lifeSteal * 100).toFixed(1)}%</span></div>
+                    <div class="stat-item"><span class="label">치명타 확률</span><span class="value">${(game.criticalStrikeChance * 100).toFixed(1)}%</span></div>
+                    <div class="stat-item"><span class="label">플레이어에게 입힌 피해</span><span class="value">${game.damageToPlayer}</span></div>
+                    <div class="stat-item"><span class="label">몬스터에게 입힌 피해</span><span class="value">${game.damageToMonster}</span></div>
+                </div>
+            `;
+            // Scroll to details
+            matchDetailsDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Allow Enter key to trigger search
+        nicknameInput.addEventListener('keyup', e => e.key === 'Enter' && searchButton.click());
+        apiKeyInput.addEventListener('keyup', e => e.key === 'Enter' && searchButton.click());
+
+    </script>
+</body>
+</html>
+''
