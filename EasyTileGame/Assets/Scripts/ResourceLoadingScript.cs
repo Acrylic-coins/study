@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using System;   // List, Queue 등 컬렉션 사용
 using System.Linq;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
 
 class TileUnit
 {
@@ -20,6 +23,8 @@ public class ResourceLoadingScript : MonoBehaviour
 	// 해당 오브젝트 중복 방지(싱글톤)
 	public static ResourceLoadingScript Instance;
 
+	[SerializeField] TextMeshProUGUI loadingText;
+
 	List<Dictionary<string, string>> gameObjectList = new List<Dictionary<string, string>>(); // GameObjectTypeCode.csv를 읽어오기 위한 리스트
 	List<Dictionary<string, string>> sprList = new List<Dictionary<string, string>>(); // SpriteTypeCode.csv를 읽어오기 위한 리스트
 	List<Dictionary<string, string>> aniList = new List<Dictionary<string, string>>(); // AnimatorTypeCode.csv를 읽어오기 위한 리스트
@@ -34,6 +39,9 @@ public class ResourceLoadingScript : MonoBehaviour
 	// 나중에 리소스 해제용 핸들 저장
 	private List<AsyncOperationHandle<GameObject>> tileHandles = new List<AsyncOperationHandle<GameObject>>();
 
+	private float loadingGage = 0f;	// 리소스 불러오기 진행도
+	private int resourceCnt = 0;	// 총 가져와야 하는 리소스(대략적인)
+	private int compleResource = 0;	// 총 가져온 리소스(가져오지 못한것도 포함)
 	private void Awake()
 	{
 		if (Instance == null)
@@ -49,8 +57,12 @@ public class ResourceLoadingScript : MonoBehaviour
 		// csv파일 읽어오기
 		gameObjectList = CSVReader.ReadCSV("GameObjectTypeCode.csv");
 		sprList = CSVReader.ReadCSV("SpriteTypeCode.csv");
+		aniList = CSVReader.ReadCSV("AnimatorTypeCode.csv");
 		elementList = CSVReader.ReadCSV("ElementCode.csv");
-
+		// 가져와야할 리소스 개수를 대강 세어보기(정확하지 않음)
+		resourceCnt = (gameObjectList.Count + sprList.Count + aniList.Count) * elementList.Count;
+		// 현재 로딩상황 초기화
+		loadingText.text = "0%";
 	}
 
 	private void Start()
@@ -58,11 +70,6 @@ public class ResourceLoadingScript : MonoBehaviour
 		InitialGameObjectResource();	// GameObject 리소스 가져오기
 		InitialSpriteResource();	// Sprite 리소스 가져오기
 		InitialAnimatorResource();	// Animator 리소스 가져오기
-	}
-
-	private void Update()
-	{
-		Debug.Log(gameObjectResourceDic.Count);
 	}
 
 	// 자료형이 GameObject인 리소스를 하나씩 전부 가져온다.
@@ -94,8 +101,14 @@ public class ResourceLoadingScript : MonoBehaviour
 				obj.Completed += (obj) =>
 				{
 					gameObjectResourceDic.Add(str, obj.Result);
-
+					// 리소스를 불러왔으니 로딩게이지를 높인다.
+					UpdateLoadingGage(1);
 				};
+			}
+			else
+			{
+				// 리소스가 없어도 로딩게이지를 높인다. (없는 리소스도 세었기 때문)
+				UpdateLoadingGage(1);
 			}
 		};
 	}
@@ -129,8 +142,14 @@ public class ResourceLoadingScript : MonoBehaviour
 				obj.Completed += (obj) =>
 				{
 					spriteResourceDic.Add(str, obj.Result);
-
+					// 리소스를 불러왔으니 로딩게이지를 높인다.
+					UpdateLoadingGage(1);
 				};
+			}
+			else
+			{
+				// 리소스가 없어도 로딩게이지를 높인다. (없는 리소스도 세었기 때문)
+				UpdateLoadingGage(1);
 			}
 		};
 	}
@@ -164,9 +183,34 @@ public class ResourceLoadingScript : MonoBehaviour
 				obj.Completed += (obj) =>
 				{
 					animatorResourceDic.Add(str, obj.Result);
-
+					// 리소스를 불러왔으니 로딩게이지를 높인다.
+					UpdateLoadingGage(1);
 				};
 			}
+			else
+			{
+				// 리소스가 없어도 로딩게이지를 높인다. (없는 리소스도 세었기 때문)
+				UpdateLoadingGage(1);
+			}
 		};
+	}
+	// 로딩상황을 생긴하는 함수
+	private void UpdateLoadingGage(int cnt)
+	{
+		compleResource += cnt;
+		loadingGage = ((float)compleResource / (float)resourceCnt) * 100;
+
+		// 현재 로딩상황 갱신
+		loadingText.text = loadingGage.ToString("F2") + "%";
+
+		if (compleResource == resourceCnt)
+		{
+			MoveAnotherScene("MainPlayScene");
+		}
+	}
+
+	private void MoveAnotherScene(string str)
+	{
+		SceneManager.LoadScene(str);
 	}
 }
