@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eternal Return 최종 전적 검색</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+        
+        :root {
+            --color-rank1-bg: #e8f5e9; --color-rank1-border: #81c784;
+            --color-rank2-bg: #e3f2fd; --color-rank2-border: #64b5f6;
+            --color-top3-bg: #f1f8f0; --color-top3-border: #b4e0a7;
+            --color-lose-bg: #fff0f0; --color-lose-border: #ffc9c9;
+            --color-text-primary: #212529; --color-text-secondary: #495057;
+            --color-text-mmr-up: #1e88e5; --color-text-mmr-down: #e53935;
+            --color-damage-dealt: #007bff; /* Blue */
+            --color-damage-taken: #dc3545; /* Red */
+            --color-border: #dee2e6; --color-background: #f8f9fa;
+            --color-white: #ffffff;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text-primary);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .search-container {
+            background: var(--color-white);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        
+        h1 { text-align: center; margin-bottom: 2rem; }
+        .input-group { margin-bottom: 1rem; }
+        input[type="text"], input[type="password"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%; padding: 12px; border: none; border-radius: 4px;
+            background-color: #007bff; color: white; font-size: 1.1rem;
+            cursor: pointer; transition: background-color 0.2s; font-weight: 500;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+
+        #status { text-align: center; margin: 20px 0; font-size: 1rem; color: var(--color-text-secondary); min-height: 24px; }
+
+        .results-layout {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .match-history-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .match-item {
+            display: flex; align-items: center; padding: 10px;
+            border: 1px solid var(--color-border); border-left-width: 5px;
+            border-radius: 4px; background-color: var(--color-white);
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .match-item:hover, .match-item.selected { 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #007bff;
+        }
+        .match-item.rank1 { border-left-color: var(--color-rank1-border); background-color: var(--color-rank1-bg); }
+        .match-item.rank2 { border-left-color: var(--color-rank2-border); background-color: var(--color-rank2-bg); }
+        .match-item.top3 { border-left-color: var(--color-top3-border); background-color: var(--color-top3-bg); }
+        .match-item.lose { border-left-color: var(--color-lose-border); background-color: var(--color-lose-bg); }
+        
+        .match-item .character-img { width: 45px; height: 45px; border-radius: 50%; margin-right: 10px; }
+        .match-item .game-summary {
+            display: flex; flex-direction: column; flex-grow: 1;
+        }
+        .match-item .summary-top {
+            display: flex; align-items: center; font-size: 1.2rem; font-weight: 700;
+        }
+        .match-item .game-rank { margin-right: 10px; }
+        .match-item .kda { font-size: 0.9rem; font-weight: 500; color: var(--color-text-secondary); }
+        .match-item .damage-info {
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+        .match-item .damage-dealt { color: var(--color-damage-dealt); font-weight: 500; }
+        .match-item .damage-taken { color: var(--color-damage-taken); font-weight: 500; }
+        .match-item .summary-bottom {
+            display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--color-text-secondary); margin-top: 4px;
+        }
+        .match-item .mmr-change.up { color: var(--color-text-mmr-up); }
+        .match-item .mmr-change.down { color: var(--color-text-mmr-down); }
+
+        .match-details-view {
+            position: sticky; top: 20px; /* Makes it stick on scroll */
+            background: var(--color-white); padding: 20px; border-radius: 8px; box-shadow: var(--shadow);
+            display: none; /* Initially hidden */
+        }
+        .match-details-view h2 { margin-top: 0; border-bottom: 1px solid var(--color-border); padding-bottom: 10px; }
+        .death-info { background: #ffebee; border: 1px solid #ffcdd2; padding: 10px; border-radius: 4px; margin-top: 15px; text-align: center; }
+        .stats-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; margin-top: 15px;
+        }
+        .stat-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f3f5; font-size: 0.9rem; }
+        .stat-item .label { font-weight: 500; color: var(--color-text-secondary); }
+        .stat-item .value { font-weight: 500; }
+
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="search-container">
+            <h1>Eternal Return 최종 전적 검색</h1>
+            <div class="input-group">
+                <input type="password" id="apiKey" placeholder="X-Api-Key를 입력하세요">
+            </div>
+            <div class="input-group">
+                <input type="text" id="nickname" placeholder="검색할 닉네임을 입력하세요">
+            </div>
+            <button id="searchButton">전적 검색</button>
+        </div>
+
+        <div id="status"></div>
+
+        <div class="results-layout" id="results-layout" style="display: none;">
+            <div class="match-history-list" id="match-history"></div>
+            <div class="match-details-view" id="match-details"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA MAPPING ---
+        const CHARACTER_DATA = {};
+        // Expanded l10nData for more comprehensive character mapping
+        const l10nData = `
+            Character/Name/1┃재키
+            Character/Name/2┃아야
+            Character/Name/3┃피오라
+            Character/Name/4┃매그너스
+            Character/Name/5┃자히르
+            Character/Name/6┃나딘
+            Character/Name/7┃현우
+            Character/Name/8┃하트
+            Character/Name/9┃아이솔
+            Character/Name/10┃리 다이린
+            Character/Name/11┃유키
+            Character/Name/12┃혜진
+            Character/Name/13┃쇼우
+            Character/Name/14┃키아라
+            Character/Name/15┃시셀라
+            Character/Name/16┃실비아
+            Character/Name/17┃아드리아나
+            Character/Name/18┃쇼이치
+            Character/Name/19┃엠마
+            Character/Name/20┃레녹스
+            Character/Name/21┃로지
+            Character/Name/22┃루크
+            Character/Name/23┃캐시
+            Character/Name/24┃아델라
+            Character/Name/25┃버니스
+            Character/Name/26┃바바라
+            Character/Name/27┃알렉스
+            Character/Name/28┃수아
+            Character/Name/29┃레온
+            Character/Name/30┃일레븐
+            Character/Name/31┃리오
+            Character/Name/32┃윌리엄
+            Character/Name/33┃니키
+            Character/Name/34┃나타폰
+            Character/Name/35┃얀
+            Character/Name/36┃이바
+            Character/Name/37┃다니엘
+            Character/Name/38┃제니
+            Character/Name/39┃카밀로
+            Character/Name/40┃클로에
+            Character/Name/41┃요한
+            Character/Name/42┃비앙카
+            Character/Name/43┃셀린
+            Character/Name/44┃에키온
+            Character/Name/45┃마이
+            Character/Name/46┃에이든
+            Character/Name/47┃라우라
+            Character/Name/48┃띠아
+            Character/Name/49┃펠릭스
+            Character/Name/50┃엘레나
+            Character/Name/51┃프리야
+            Character/Name/52┃아디나
+            Character/Name/53┃마커스
+            Character/Name/54┃칼라
+            Character/Name/55┃에스텔
+            Character/Name/56┃피올로
+            Character/Name/57┃마르티나
+            Character/Name/58┃헤이즈
+            Character/Name/59┃아이작
+            Character/Name/60┃타지아
+            Character/Name/61┃이렘
+            Character/Name/62┃테오도르
+            Character/Name/63┃이안
+            Character/Name/64┃바냐
+            Character/Name/65┃데비&마를렌
+            Character/Name/66┃아르다
+            Character/Name/67┃아비게일
+            Character/Name/68┃알론소
+            Character/Name/69┃레니
+            Character/Name/70┃츠바메
+            Character/Name/71┃케네스
+            Character/Name/72┃카티야
+            Character/Name/73┃샬럿
+            Character/Name/74┃다르코
+            Character/Name/75┃르노어
+            Character/Name/76┃가넷
+            Character/Name/77┃유민
+            Character/Name/78┃히스이
+            Character/Name/79┃유스티나
+            Character/Name/80┃이슈트반
+            Character/Name/81┃니아
+            GameResult/Character/Name/1┃Jackie
+            GameResult/Character/Name/2┃Aya
+            GameResult/Character/Name/3┃Fiora
+            GameResult/Character/Name/4┃Magnus
+            GameResult/Character/Name/5┃Zahir
+            GameResult/Character/Name/6┃Nadine
+            GameResult/Character/Name/7┃Hyunwoo
+            GameResult/Character/Name/8┃Hart
+            GameResult/Character/Name/9┃Isol
+            GameResult/Character/Name/10┃Li Dailin
+            GameResult/Character/Name/11┃Yuki
+            GameResult/Character/Name/12┃Hyejin
+            GameResult/Character/Name/13┃Xiukai
+            GameResult/Character/Name/14┃Chiara
+            GameResult/Character/Name/15┃Sissela
+            GameResult/Character/Name/16┃Silvia
+            GameResult/Character/Name/17┃Adriana
+            GameResult/Character/Name/18┃Shoichi
+            GameResult/Character/Name/19┃Emma
+            GameResult/Character/Name/20┃Lenox
+            GameResult/Character/Name/21┃Rozzi
+            GameResult/Character/Name/22┃Luke
+            GameResult/Character/Name/23┃Cathy
+            GameResult/Character/Name/24┃Adela
+            GameResult/Character/Name/25┃Bernice
+            GameResult/Character/Name/26┃Barbara
+            GameResult/Character/Name/27┃Alex
+            GameResult/Character/Name/28┃Sua
+            GameResult/Character/Name/29┃Leon
+            GameResult/Character/Name/30┃Eleven
+            GameResult/Character/Name/31┃Rio
+            GameResult/Character/Name/32┃William
+            GameResult/Character/Name/33┃Nicky
+            GameResult/Character/Name/34┃Nathapon
+            GameResult/Character/Name/35┃Jan
+            GameResult/Character/Name/36┃Eva
+            GameResult/Character/Name/37┃Daniel
+            GameResult/Character/Name/38┃Jenny
+            GameResult/Character/Name/39┃Camilo
+            GameResult/Character/Name/40┃Chloe
+            GameResult/Character/Name/41┃Johann
+            GameResult/Character/Name/42┃Bianca
+            GameResult/Character/Name/43┃Celine
+            GameResult/Character/Name/44┃Echion
+            GameResult/Character/Name/45┃Mai
+            GameResult/Character/Name/46┃Aiden
+            GameResult/Character/Name/47┃Laura
+            GameResult/Character/Name/48┃Tia
+            GameResult/Character/Name/49┃Felix
+            GameResult/Character/Name/50┃Elena
+            GameResult/Character/Name/51┃Priya
+            GameResult/Character/Name/52┃Adina
+            GameResult/Character/Name/53┃Markus
+            GameResult/Character/Name/54┃Karla
+            GameResult/Character/Name/55┃Estelle
+            GameResult/Character/Name/56┃Piolo
+            GameResult/Character/Name/57┃Martina
+            GameResult/Character/Name/58┃Haze
+            GameResult/Character/Name/59┃Isaac
+            GameResult/Character/Name/60┃Tazia
+            GameResult/Character/Name/61┃Irem
+            GameResult/Character/Name/62┃Theodore
+            GameResult/Character/Name/63┃Ly Anh
+            GameResult/Character/Name/64┃Vanya
+            GameResult/Character/Name/65┃Debi & Marlene
+            GameResult/Character/Name/66┃Arda
+            GameResult/Character/Name/67┃Abigail
+            GameResult/Character/Name/68┃Alonso
+            GameResult/Character/Name/69┃Leni
+            GameResult/Character/Name/70┃Tsubame
+            GameResult/Character/Name/71┃Kenneth
+            GameResult/Character/Name/72┃Katja
+            GameResult/Character/Name/73┃Charlotte
+            GameResult/Character/Name/74┃Darko
+            GameResult/Character/Name/75┃Lenore
+            GameResult/Character/Name/76┃Garnet
+            GameResult/Character/Name/77┃Yumin
+            GameResult/Character/Name/78┃Hisui
+            GameResult/Character/Name/79┃Justyna
+            GameResult/Character/Name/80┃Istvan
+            GameResult/Character/Name/81┃Niah
+        `;
+
+        l10nData.trim().split('\n').forEach(line => {
+            const parts = line.trim().split('┃');
+            if (parts.length !== 2) return;
+            const keyParts = parts[0].split('/');
+            const type = keyParts[0];
+            const subType = keyParts[1];
+            const code = keyParts[2];
+            const value = parts[1];
+
+            if (!CHARACTER_DATA[code]) CHARACTER_DATA[code] = {};
+            if (type === 'Character' && subType === 'Name') CHARACTER_DATA[code].kr = value;
+            if (type === 'GameResult' && subType === 'Character' && keyParts[2] === 'Name') {
+                 const engCode = keyParts[3];
+                 if (!CHARACTER_DATA[engCode]) CHARACTER_DATA[engCode] = {};
+                 CHARACTER_DATA[engCode].en = value;
+            }
+        });
+
+        const TEAM_MODE_MAP = { 1: "솔로", 2: "듀오", 3: "스쿼드" };
+
+        // --- DOM ELEMENTS ---
+        const searchButton = document.getElementById('searchButton');
+        const nicknameInput = document.getElementById('nickname');
+        const apiKeyInput = document.getElementById('apiKey');
+        const statusDiv = document.getElementById('status');
+        const resultsLayout = document.getElementById('results-layout');
+        const matchHistoryDiv = document.getElementById('match-history');
+        const matchDetailsDiv = document.getElementById('match-details');
+
+        const API_BASE_URL = 'https://open-api.bser.io/v1';
+
+        // --- API CALL LOGIC ---
+        async function fetchApi(endpoint, apiKey) {
+            const url = `${API_BASE_URL}/${endpoint}`;
+            const response = await fetch(url, { headers: { 'x-api-key': apiKey, 'Accept': 'application/json' } });
+            const data = await response.json();
+            if (!response.ok) throw new Error(`[${data.code}] ${data.message}`);
+            return data;
+        }
+
+        // --- MAIN SEARCH FUNCTION ---
+        searchButton.addEventListener('click', async () => {
+            const nickname = nicknameInput.value.trim();
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey || !nickname) {
+                statusDiv.textContent = 'API 키와 닉네임을 모두 입력해주세요.';
+                return;
+            }
+
+            searchButton.disabled = true;
+            statusDiv.textContent = '유저 정보 검색 중...';
+            resultsLayout.style.display = 'none';
+            matchHistoryDiv.innerHTML = '';
+            matchDetailsDiv.style.display = 'none';
+
+            try {
+                const userData = await fetchApi(`user/nickname?query=${nickname}`, apiKey);
+                const userNum = userData.user.userNum;
+                statusDiv.textContent = `최근 게임 기록을 불러오는 중...`;
+
+                const gameData = await fetchApi(`user/games/${userNum}`, apiKey);
+                if (gameData.userGames && gameData.userGames.length > 0) {
+                    displayMatchHistory(gameData.userGames);
+                    resultsLayout.style.display = 'grid';
+                    statusDiv.textContent = `최근 ${gameData.userGames.length}개의 게임 기록을 찾았습니다. 첫 번째 경기를 자동으로 선택합니다.`;
+                    if (gameData.userGames[0]) {
+                        document.querySelector('.match-item').click();
+                    }
+                } else {
+                    statusDiv.textContent = '최근 게임 기록이 없습니다.';
+                }
+            } catch (error) {
+                statusDiv.textContent = `오류: ${error.message}`;
+            } finally {
+                searchButton.disabled = false;
+            }
+        });
+        
+        // --- UI RENDERING ---
+        function displayMatchHistory(games) {
+            matchHistoryDiv.innerHTML = ''; // Clear previous results
+            games.forEach((game, index) => {
+                const matchItem = document.createElement('div');
+                matchItem.className = 'match-item';
+                matchItem.dataset.index = index;
+
+                if (game.gameRank === 1) matchItem.classList.add('rank1');
+                else if (game.gameRank === 2) matchItem.classList.add('rank2');
+                else if (game.gameRank <= 3) matchItem.classList.add('top3');
+                else matchItem.classList.add('lose');
+
+                const character = CHARACTER_DATA[game.characterNum] || { kr: '알 수 없음', en: 'Unknown' };
+                const imageUrl = `https://static.bigbrain.gg/assets/images/er/characters/mini/${character.en}.png`;
+
+                const mmrGain = game.mmrGain;
+                const mmrClass = mmrGain > 0 ? 'up' : (mmrGain < 0 ? 'down' : '');
+                const mmrText = mmrGain > 0 ? `+${mmrGain}` : mmrGain;
+
+                // Calculate Damage per Team Kill
+                const damagePerTeamKill = game.totalTeamKills > 0 ? Math.round(game.damageToPlayer / game.totalTeamKills) : game.damageToPlayer;
+                const damageTaken = game.damageFromPlayer;
+
+                matchItem.innerHTML = `
+                    <img src="${imageUrl}" alt="${character.kr}" class="character-img" onerror="this.style.display='none'">
+                    <div class="game-summary">
+                        <div class="summary-top">
+                            <span class="game-rank">#${game.gameRank}</span>
+                            <span>${TEAM_MODE_MAP[game.matchingTeamMode] || '기타'}</span>
+                        </div>
+                        <div class="kda">${game.playerKill}K/${game.playerDeaths}D/${game.playerAssistant}A</div>
+                        <div class="damage-info">
+                            <span class="damage-dealt">딜: ${damagePerTeamKill}</span> / 
+                            <span class="damage-taken">받은 딜: ${damageTaken}</span>
+                        </div>
+                        <div class="summary-bottom">
+                            <span>${Math.floor(game.playTime / 60)}분 전</span>
+                            <span class="mmr-change ${mmrClass}">${mmrText} (${game.mmrAfter})</span>
+                        </div>
+                    </div>
+                `;
+                
+                matchItem.addEventListener('click', () => {
+                    document.querySelectorAll('.match-item').forEach(item => item.classList.remove('selected'));
+                    matchItem.classList.add('selected');
+                    displayMatchDetails(game);
+                });
+                matchHistoryDiv.appendChild(matchItem);
+            });
+        }
+
+        function displayMatchDetails(game) {
+            matchDetailsDiv.style.display = 'block';
+            const character = CHARACTER_DATA[game.characterNum] || { kr: '알 수 없음' };
+            
+            // Killer information
+            let killerName = game.killer; // Default to raw killer string
+            if (game.killerCharacter && CHARACTER_DATA[game.killerCharacter]) {
+                killerName = CHARACTER_DATA[game.killerCharacter].kr; // Use character name if available
+            } else if (game.killer === 'player') {
+                killerName = '다른 플레이어'; // Fallback for 'player' if character code is missing or invalid
+            }
+
+            let deathHtml = '<div class="death-info">';
+            if (game.killer) {
+                deathHtml += `<strong>${killerName}</strong>(으)에게 <strong>${game.causeOfDeath}</strong>(으)로 처치됨`;
+            } else {
+                deathHtml += '생존';
+            }
+            deathHtml += '</div>';
+
+            matchDetailsDiv.innerHTML = `
+                <h2>${character.kr} (#${game.gameRank}) - 상세 스탯</h2>
+                ${deathHtml}
+                <div class="stats-grid">
+                    <div class="stat-item"><span class="label">최대 체력</span><span class="value">${game.maxHp}</span></div>
+                    <div class="stat-item"><span class="label">최대 스태미나</span><span class="value">${game.maxSp}</span></div>
+                    <div class="stat-item"><span class="label">공격력</span><span class="value">${game.attackPower}</span></div>
+                    <div class="stat-item"><span class="label">방어력</span><span class="value">${game.defense}</span></div>
+                    <div class="stat-item"><span class="label">공격 속도</span><span class="value">${game.attackSpeed.toFixed(2)}</span></div>
+                    <div class="stat-item"><span class="label">이동 속도</span><span class="value">${game.moveSpeed.toFixed(2)}</span></div>
+                    <div class="stat-item"><span class="label">체력 재생</span><span class="value">${game.hpRegen.toFixed(2)}</span></div>
+                    <div class="stat-item"><span class="label">스태미나 재생</span><span class="value">${game.spRegen.toFixed(2)}</span></div>
+                    <div class="stat-item"><span class="label">모든 피해 흡혈</span><span class="value">${(game.lifeSteal * 100).toFixed(1)}%</span></div>
+                    <div class="stat-item"><span class="label">치명타 확률</span><span class="value">${(game.criticalStrikeChance * 100).toFixed(1)}%</span></div>
+                    <div class="stat-item"><span class="label">입힌 피해량</span><span class="value">${game.damageToPlayer}</span></div>
+                    <div class="stat-item"><span class="label">받은 피해량</span><span class="value">${game.damageFromPlayer}</span></div>
+                </div>
+            `;
+        }
+
+        // Allow Enter key to trigger search
+        [nicknameInput, apiKeyInput].forEach(input => 
+            input.addEventListener('keyup', e => e.key === 'Enter' && searchButton.click())
+        );
+
+    </script>
+</body>
+</html>
