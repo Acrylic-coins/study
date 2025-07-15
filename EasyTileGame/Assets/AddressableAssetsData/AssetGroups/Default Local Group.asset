@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_GUID: 0c0424971e73a3840a4f4b1056a47ab0
+  m_SerializeEntries:
+  - m_GUID: 02f0142f2f20cc640b8c9afbd9d6bdf2
+    m_Address: MainTile_Ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1b244b4edc96ed847a73f44c9634bf22
+    m_Address: MainTile_Soil
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1bed0ec08d2c000469335c82b407778c
+    m_Address: MainTile_Light
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 531f1d4bbcc0d7b4282edeff81f8bdaf
+    m_Address: MainTile_Fire
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 67b45c768f38f104aa29027e9e9da694
+    m_Address: MainTile_All
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7b62791f41530924e8e2eeb02e8766a2
+    m_Address: EmptyObject
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8566273a55a32de4ca92886e31ae3c50
+    m_Address: RespawnLocPrefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8d6a3bd671ec23f46a092cee8c61c16a
+    m_Address: MainTile_Metal
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9e983f2fbe73be6418d329bd048e7683
+    m_Address: MainTile_Nothing
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b8c786c88665f79479b342e7e0232d54
+    m_Address: MainTile_Thunder
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c68f90215b2d54d4eaa121c4ac6304f0
+    m_Address: MainTile_Dark
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e5872d2609491fb479678858fe551e6c
+    m_Address: MainTile_Plant
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: c90f008a0e84ed446b3cba3c1cf31cb9, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: e4096c5eaceccde46b2aacf3448289cc, type: 2}
+    - {fileID: 11400000, guid: d20a0579d76a0694ab206684385c931d, type: 2}
