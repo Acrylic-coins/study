@@ -2,69 +2,61 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.EventSystems;
 using Unity.VisualScripting;
+using System.Collections.Generic;
+using System.Collections;
 
-public class GameStartTextShader : MonoBehaviour, IPointerMoveHandler, IPointerExitHandler
+public class GameStartTextShader : MonoBehaviour, IPointerExitHandler, IPointerEnterHandler
 {
-    [SerializeField]private TextMeshProUGUI startTMProUGUI;
+	[SerializeField] private GameObject startObj;
 
-	private Transform startTMProBtnTrans;
+	private Coroutine textEffectCo;	// 주기적으로 이펙트를 생성하기 위한 코루틴
 
-	private float textXSize = 1f; // 기존의 텍스트 X사이즈 배율
-	private float textYSize = 1f; // 기존의 텍스트 Y사이즈 배율
+	private WaitForSeconds textEffectTerm; // 이펙트 생성 텀
 
-	private float textXSizeChange = 1f; // 텍스트 X사이즈 현재 배율
-	private float textYSizeChange = 1f; // 텍스트 Y사이즈 현재 배율
-
-	private float textXOffset = 0f; // 텍스트의 x위치와 원점의 x위치(0)까지의 거리 차이
-	private float textYOffset = 0f; // 텍스트의 y위치와 원점의 y위치(0)까지의 거리 차이
-
-	private bool isMove = false;
-
-	
+	private List<StartUIShader> startTMProUGUIList = new List<StartUIShader>();	// 오브젝트 내 이펙트를 발동시키는 스크립트들을 담은 리스트
 
 	private void Awake()
 	{
-		startTMProBtnTrans = this.gameObject.transform;
-		textXOffset = 0f - startTMProBtnTrans.GetComponent<RectTransform>().localPosition.x;
-		textYOffset = 0f - startTMProBtnTrans.GetComponent<RectTransform>().localPosition.y;
-		Debug.Log(textXOffset + "&" + textYOffset);
-		// 텍스트 크기 변환 이전에 위치이동을 방지하기 위해 위치를 원점으로 해야됨
-		startTMProUGUI.fontMaterial.SetFloat("_OriginOffsetX", textXOffset);
-		startTMProUGUI.fontMaterial.SetFloat("_OriginOffsetY", textYOffset);
+		textEffectCo = null;
+		textEffectTerm = new WaitForSeconds(0.2f);
+
+		// TMP 리스트 초기화
+		startTMProUGUIList.Clear();
+		for (int i = 0; i < startObj.transform.childCount; i++)
+		{
+			startTMProUGUIList.Add(startObj.transform.GetChild(i).GetComponent<StartUIShader>());
+			startObj.transform.GetChild(i).gameObject.SetActive(false);
+		}
 	}
 
 	// 커서가 해당 오브젝트를 벗어날 시 한 번 호출됨
 	void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
 	{
-		// 텍스트 사이즈가 원래대로 돌아오도록 tmpro의 마테리얼 변수를 초기화
-		// (텍스트이므로 material이 아니라 반드시 fontMaterial을 쓸것!)
-		startTMProUGUI.fontMaterial.SetFloat("_MultiX", textXSize);
-		startTMProUGUI.fontMaterial.SetFloat("_MultiY", textYSize);
-
-		textXSizeChange = textXSize;
-		textYSizeChange = textYSize;
-		isMove = false;
+		StopCoroutine(textEffectCo);
 	}
 
-	// 커서가 해당 오브젝트 위에 있을 시 매 프레임 호출됨
-	void IPointerMoveHandler.OnPointerMove(PointerEventData eventData)
+	public void OnPointerEnter(PointerEventData eventData)
 	{
-		isMove = true;
+		textEffectCo = StartCoroutine(TextEffectCo());
 	}
 
-	private void Update()
+	IEnumerator TextEffectCo()
 	{
-		if (isMove)
+		while(true)
 		{
-			// 삼항연산자
-			// 텍스트 사이즈를 점진적으로 ( 1f / Time.deltaTIme) 만큼 증가시킴. 사이즈의 최대치는 2임
-			textXSizeChange = ((textXSizeChange + Time.deltaTime) < 2f ? (textXSizeChange + Time.deltaTime) : 2f);
-			textYSizeChange = ((textYSizeChange + Time.deltaTime) < 2f ? (textYSizeChange + Time.deltaTime) : 2f);
+			for (int i = 0; i < startTMProUGUIList.Count; i++)
+			{
+				if (!startTMProUGUIList[i].gameObject.activeSelf)
+				{
+					startTMProUGUIList[i].gameObject.SetActive(true);
+					startTMProUGUIList[i].InitShader(true);
+					break;
+				}				
+			}
 
-			// 텍스트 사이즈가 변화하도록 tmpro의 마테리얼 변수를 수정
-			// (텍스트이므로 material이 아니라 반드시 fontMaterial을 쓸것!)
-			startTMProUGUI.fontMaterial.SetFloat("_MultiX", textXSizeChange);
-			startTMProUGUI.fontMaterial.SetFloat("_MultiY", textYSizeChange);
+			yield return textEffectTerm;
 		}
+
+		yield return null;
 	}
 }
