@@ -7,6 +7,27 @@ using System.Collections;
 
 public class GameStartTextShader : MonoBehaviour, IPointerExitHandler, IPointerEnterHandler
 {
+	public static float SinTime 
+	{
+		get
+		{
+			return sinTime;
+		}
+		private set
+		{
+			if (sinTime > 360)
+			{
+				sinTime = 360 % value;
+			}
+			else
+			{
+				sinTime = value;
+			}
+		}
+	}
+	private static float sinTime = 0f;
+
+
 	[SerializeField] private GameObject startObj;
 
 	private Coroutine textEffectCo;	// 주기적으로 이펙트를 생성하기 위한 코루틴
@@ -18,7 +39,7 @@ public class GameStartTextShader : MonoBehaviour, IPointerExitHandler, IPointerE
 	private void Awake()
 	{
 		textEffectCo = null;
-		textEffectTerm = new WaitForSeconds(0.2f);
+		textEffectTerm = new WaitForSeconds(0.4f);
 
 		// TMP 리스트 초기화
 		startTMProUGUIList.Clear();
@@ -58,5 +79,10 @@ public class GameStartTextShader : MonoBehaviour, IPointerExitHandler, IPointerE
 		}
 
 		yield return null;
+	}
+
+	private void Update()
+	{
+		SinTime += Time.deltaTime;
 	}
 }
