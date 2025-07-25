@@ -20,8 +20,8 @@ public class StartUIShader : MonoBehaviour
 	private float textXOffset = 0f; // 텍스트의 x위치와 원점의 x위치(0)까지의 거리 차이
 	private float textYOffset = 0f; // 텍스트의 y위치와 원점의 y위치(0)까지의 거리 차이
 
-	private float defaultAlpha = 0.35f;    // textAlpha의 초기값
-	private float textAlpha = 0.35f; // 텍스트의 알파값 변화를 주기위한 값
+	private float defaultAlpha = 0.65f;    // textAlpha의 초기값
+	private float textAlpha = 0.65f; // 텍스트의 알파값 변화를 주기위한 값
 
 	private float sin1 = 0f; // 랜덤한 색상을 위한 변수
 	private float sin2 = 0f;
@@ -42,6 +42,7 @@ public class StartUIShader : MonoBehaviour
 		// 텍스트 크기 변환 이전에 위치이동을 방지하기 위해 위치를 원점으로 해야됨
 		startTMProUGUI.fontMaterial.SetFloat("_OriginOffsetX", textXOffset);
 		startTMProUGUI.fontMaterial.SetFloat("_OriginOffsetY", textYOffset);
+
 	}
 
 	public void InitShader(bool isStr)
@@ -53,7 +54,7 @@ public class StartUIShader : MonoBehaviour
 
 		startTMProUGUI.fontMaterial.SetFloat("_AlphaGage", defaultAlpha);
 
-		startTMProUGUI.fontMaterial.SetColor("_Color", defaultColor);
+		startTMProUGUI.fontMaterial.SetColor("_OutLineColor", defaultColor);
 
 		// 텍스트 사이즈 초기화
 		textXSizeChange = textXSize;
@@ -84,7 +85,7 @@ public class StartUIShader : MonoBehaviour
 		textYSizeChange = ((textYSizeChange + (Time.deltaTime)) < 2f ? (textYSizeChange + (Time.deltaTime)) : 2f);
 
 		// 텍스트의 알파값에 빼줄 값임 점진적으로 증가시킴. 최대값은 1임
-		textAlpha = ((textAlpha + (Time.deltaTime * 0.8f)) < 1f ? (textAlpha + (Time.deltaTime * 0.8f)) : 1f);
+		textAlpha = ((textAlpha + (Time.deltaTime * 0.6f)) < 1f ? (textAlpha + (Time.deltaTime * 0.6f)) : 1f);
 
 		// 텍스트 사이즈가 변화하도록 tmpro의 마테리얼 변수를 수정
 		// (텍스트이므로 material이 아니라 반드시 fontMaterial을 쓸것!)
@@ -98,8 +99,8 @@ public class StartUIShader : MonoBehaviour
 		sin1 = (Mathf.Sin(GameStartTextShader.SinTime)) * 0.05f;
 		sin2 = (Mathf.Sin(GameStartTextShader.SinTime + 70)) * 0.05f;
 		sin3 = (Mathf.Sin(GameStartTextShader.SinTime + 160)) * 0.05f;
-		startTMProColor = startTMProUGUI.fontMaterial.GetColor("_Color") + new Color(sin1, sin2, sin3, Time.deltaTime * -1);
-		startTMProUGUI.fontMaterial.SetColor("_Color", startTMProColor);
+		startTMProColor = startTMProUGUI.fontMaterial.GetColor("_OutLineColor") + new Color(sin1, sin2, sin3, Time.deltaTime * -1);
+		startTMProUGUI.fontMaterial.SetColor("_OutLineColor", startTMProColor);
 
 		if (textXSizeChange + textYSizeChange == 4f && textAlpha >= 1f)
 		{
