@@ -23,7 +23,11 @@ public class ResourceLoadingScript : MonoBehaviour
 	// 해당 오브젝트 중복 방지(싱글톤)
 	public static ResourceLoadingScript Instance;
 
-	[SerializeField] TextMeshProUGUI loadingText;
+	[SerializeField] private TextMeshProUGUI loadingText;
+	// 리소스를 요구하는 곳에서 온 주문
+	[SerializeField] private ResourceOrder[] resourceOrders;
+	// 주문이 배송되어야 하는 주소 오브젝트
+	GameObject[] resourceOrderAddress;
 
 	List<Dictionary<string, string>> gameObjectList = new List<Dictionary<string, string>>(); // GameObjectTypeCode.csv를 읽어오기 위한 리스트
 	List<Dictionary<string, string>> sprList = new List<Dictionary<string, string>>(); // SpriteTypeCode.csv를 읽어오기 위한 리스트
@@ -31,13 +35,15 @@ public class ResourceLoadingScript : MonoBehaviour
 	List<Dictionary<string, string>> elementList = new List<Dictionary<string, string>>(); // ElementCode.csv를 읽어오기 위한 리스트
 
 	Dictionary<string, GameObject> gameObjectResourceDic = new Dictionary<string, GameObject>(); // 각종 게임 오브젝트 리소스를 해당 딕셔너리에 가져옴
-	Dictionary<string, Sprite> spriteResourceDic = new Dictionary<string, Sprite>(); // 각종 스프라이트 리소스를 해당 딕셔너리에 가져옴
+	Dictionary<string, List<Sprite>> spriteResourceDic = new Dictionary<string, List<Sprite>>(); // 각종 스프라이트 리소스를 해당 딕셔너리에 가져옴
 	Dictionary<string, Animator> animatorResourceDic = new Dictionary<string, Animator>(); // 각종 애니메이터 리소스를 해당 딕셔너리에 가져옴
 
 	// 타일 풀을 관리하는 딕셔너리
 	private Dictionary<string, TileUnit> tilePools = new Dictionary<string, TileUnit>();
 	// 나중에 리소스 해제용 핸들 저장
 	private List<AsyncOperationHandle<GameObject>> tileHandles = new List<AsyncOperationHandle<GameObject>>();
+	// 미리 준비할 프리팹이 무엇인지 알기위한 구조체 
+	private List<Constant.OrderForm> orderForm = new List<Constant.OrderForm>();
 
 	private float loadingGage = 0f;	// 리소스 불러오기 진행도
 	private int resourceCnt = 0;	// 총 가져와야 하는 리소스(대략적인)
@@ -59,10 +65,21 @@ public class ResourceLoadingScript : MonoBehaviour
 		sprList = CSVReader.ReadCSV("SpriteTypeCode.csv");
 		aniList = CSVReader.ReadCSV("AnimatorTypeCode.csv");
 		elementList = CSVReader.ReadCSV("ElementCode.csv");
+
+		resourceOrderAddress = new GameObject[resourceOrders.Length];
+
+		for (int i = 0; i < resourceOrderAddress.Length; i++)
+		{
+			resourceOrderAddress[i] = resourceOrders[i].gameObject;
+		}
+
 		// 가져와야할 리소스 개수를 대강 세어보기(정확하지 않음)
 		resourceCnt = (gameObjectList.Count + sprList.Count + aniList.Count) * elementList.Count;
 		// 현재 로딩상황 초기화
 		loadingText.text = "0%";
+
+
+
 	}
 
 	private void Start()
@@ -137,11 +154,11 @@ public class ResourceLoadingScript : MonoBehaviour
 			// Count가 0 이하라면 존재하지 않는 것
 			if (handle.Status == AsyncOperationStatus.Succeeded && handle.Result.Count > 0)
 			{
-				AsyncOperationHandle<Sprite> obj = Addressables.LoadAssetAsync<Sprite>(str);
+				AsyncOperationHandle<Sprite[]> obj = Addressables.LoadAssetAsync<Sprite[]>(str);
 				// 리소스를 딕셔너리에 추가한다.
 				obj.Completed += (obj) =>
 				{
-					spriteResourceDic.Add(str, obj.Result);
+					spriteResourceDic.Add(str, obj.Result.ToList());
 					// 리소스를 불러왔으니 로딩게이지를 높인다.
 					UpdateLoadingGage(1);
 				};
@@ -194,7 +211,7 @@ public class ResourceLoadingScript : MonoBehaviour
 			}
 		};
 	}
-	// 로딩상황을 생긴하는 함수
+	// 리소스 로딩상황을 갱신하는 함수
 	private void UpdateLoadingGage(int cnt)
 	{
 		compleResource += cnt;
@@ -205,7 +222,148 @@ public class ResourceLoadingScript : MonoBehaviour
 
 		if (compleResource == resourceCnt)
 		{
+			InitialPrefab();
+		}
+	}
+
+	private void UpdateInstantiateGage(int cnt)
+	{
+		compleResource += cnt;
+		loadingGage = ((float)compleResource / (float)resourceOrders.Length) * 100;
+
+		// 현재 로딩상황 갱신
+		loadingText.text = loadingGage.ToString("F2") + "%";
+
+		if (compleResource == resourceOrders.Length)
+		{
 			MoveAnotherScene("MainPlayScene");
+		}
+	}
+
+	// 로딩한 리소스들을 통해 프리팹을 미리 여러개 씬에 가져옴(->오브젝트 풀링을 위함)
+	private void InitialPrefab()
+	{
+		compleResource = 0;
+
+		for (int i = 0; i < resourceOrders.Length; i++)
+		{
+			// 리소스 요구사항을 가져옴
+			MoveOrder(resourceOrders[i].GetOrderForm());
+			for (int j = 0; j < orderForm.Count; j++)
+			{
+				ResourceTypeBranch(orderForm[j], i);
+			}
+			UpdateInstantiateGage(1);
+		}
+	}
+	// 어느 한쪽의 구조체 정보를 다른 구조체로 옮기기 위한 함수. 구조체 안에 참조형식인 list 등의 자료형때문에 대입하다 문제생길까봐 만듦
+	private void MoveOrder(List<Constant.OrderForm> info)
+	{
+		orderForm.Clear();
+
+		for (int i = 0; i < info.Count; i++)
+		{
+			Constant.OrderForm fo = new Constant.OrderForm() { orderName = new List<string>() };
+			info[i].orderName.MoveList<String>(fo.orderName);
+			fo.orderType = info[i].orderType;
+			fo.orderCnt = info[i].orderCnt;
+			fo.resourceType = info[i].resourceType;
+			fo.resourceParent = info[i].resourceParent;
+			fo.resourceCode = info[i].resourceCode;
+
+			orderForm.Add(fo);
+		}
+	}
+
+	// 필요한 리소스의 타입별로 호출할 함수가 바뀜
+	private void ResourceTypeBranch(Constant.OrderForm form, int index)
+	{
+		switch(form.resourceType)
+		{
+			case Constant.ResourceType.GAMEOBJECT:
+				instantiateGameObject(form.orderName, form.orderType, form.orderCnt, index, form.resourceParent);
+				break;
+			case Constant.ResourceType.SPRITE:
+				InstantiateSprite(form.orderName, form.orderType, form.orderCnt, index, form.resourceCode);
+				break;
+		}
+	}
+	// 게임오브젝트를 전달하고자 하는 곳에 보낸다.
+	private void instantiateGameObject(List<string> name, Constant.OrderType type, int cnt, int index, Transform trans)
+	{
+		switch(type)
+		{
+			case Constant.OrderType.SELECT:
+				for (int i = 0; i < name.Count; i++)
+				{
+					if (gameObjectResourceDic.ContainsKey(name[i]))
+					{
+						for (int j = 0; j < cnt; j++)
+						{
+							var tem = Instantiate(gameObjectResourceDic[name[i]]);
+							tem.transform.parent = trans;
+							tem.transform.localPosition = Vector3.zero;
+							tem.SetActive(false);
+						}
+					}
+				}
+				break;
+			case Constant.OrderType.ALL:
+				for (int i = 0; i < name.Count; i++)
+				{
+					var list = gameObjectResourceDic.Keys.Where(x => x.Contains(name[i])).ToList();
+					for (int j = 0; j < list.Count; j++)
+					{
+						if (gameObjectResourceDic.ContainsKey(list[j]))
+						{
+							for (int k = 0; k < cnt; k++)
+							{
+								var tem = Instantiate(gameObjectResourceDic[list[j]]);
+								tem.transform.parent = trans;
+								tem.transform.localPosition = Vector3.zero;
+								tem.SetActive(false);
+							}
+						}
+					}
+				}
+				break;
+		}
+	}
+
+	private void InstantiateSprite(List<string> name, Constant.OrderType type, int cnt, int index, int code)
+	{
+		switch(type)
+		{
+			case Constant.OrderType.SELECT:
+				for (int i = 0; i < name.Count; i++)
+				{
+					if (spriteResourceDic.ContainsKey(name[i]))
+					{
+						for (int j = 0; j < cnt; j++)
+						{
+							var tem = spriteResourceDic[name[i]];
+							resourceOrders[index].SetSpriteResource(tem[0], code);
+						}
+					}
+				}
+				break;
+			case Constant.OrderType.ALL:
+				for (int i = 0; i < name.Count; i++)
+				{
+					var list = spriteResourceDic.Keys.Where(x => x.Contains(name[i])).ToList();
+					for (int j = 0; j < list.Count; j++)
+					{
+						if (spriteResourceDic.ContainsKey(list[j]))
+						{
+							for (int k = 0; k < cnt; k++)
+							{
+								var tem = spriteResourceDic[list[j]];
+								resourceOrders[index].SetSpriteResource(tem, code);
+							}
+						}
+					}
+				}
+				break;
 		}
 	}
 

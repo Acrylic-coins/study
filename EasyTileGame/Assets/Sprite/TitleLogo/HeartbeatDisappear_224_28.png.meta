@@ -1,0 +1,421 @@
+fileFormatVersion: 2
+guid: 7c85a0fdaa231de4ea04de537c1e82bd
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1040125995013176872
+    second: HeartbeatDisappear_224_28_0
+  - first:
+      213: -8015980045136317189
+    second: HeartbeatDisappear_224_28_1
+  - first:
+      213: 970001561406248233
+    second: HeartbeatDisappear_224_28_2
+  - first:
+      213: -3626359528659019523
+    second: HeartbeatDisappear_224_28_3
+  - first:
+      213: -1163750298914232924
+    second: HeartbeatDisappear_224_28_4
+  - first:
+      213: -2939039703383385941
+    second: HeartbeatDisappear_224_28_5
+  - first:
+      213: 7975497924087595994
+    second: HeartbeatDisappear_224_28_6
+  - first:
+      213: -9093684599530499585
+    second: HeartbeatDisappear_224_28_7
+  - first:
+      213: -3189459360386079729
+    second: HeartbeatDisappear_224_28_8
+  - first:
+      213: 723273608949294331
+    second: HeartbeatDisappear_224_28_9
+  - first:
+      213: -8381429490355481138
+    second: HeartbeatDisappear_224_28_10
+  - first:
+      213: -462129546330969147
+    second: HeartbeatDisappear_224_28_11
+  - first:
+      213: 5598022468097237285
+    second: HeartbeatDisappear_224_28_12
+  - first:
+      213: 3201949417915896505
+    second: HeartbeatDisappear_224_28_13
+  - first:
+      213: -6137472762300430514
+    second: HeartbeatDisappear_224_28_14
+  - first:
+      213: -3518148868191587867
+    second: HeartbeatDisappear_224_28_15
+  - first:
+      213: -5470329177061334571
+    second: HeartbeatDisappear_224_28_16
+  - first:
+      213: -4566097594046899595
+    second: HeartbeatDisappear_224_28_17
+  - first:
+      213: 7004505055838310586
+    second: HeartbeatDisappear_224_28_18
+  - first:
+      213: -4667615665858107394
+    second: HeartbeatDisappear_224_28_19
+  - first:
+      213: 817573782656005769
+    second: HeartbeatDisappear_224_28_20
+  - first:
+      213: 3752750363959545648
+    second: HeartbeatDisappear_224_28_21
+  - first:
+      213: -5119081828357895484
+    second: HeartbeatDisappear_224_28_22
+  - first:
+      213: -8180571613994180457
+    second: HeartbeatDisappear_224_28_23
+  - first:
+      213: 6016389525948165191
+    second: HeartbeatDisappear_224_28_24
+  - first:
+      213: 4698461729416356332
+    second: HeartbeatDisappear_224_28_25
+  - first:
+      213: 4304868922106013679
+    second: HeartbeatDisappear_224_28_26
+  - first:
+      213: 1196643656764844593
+    second: HeartbeatDisappear_224_28_27
+  - first:
+      213: 2132427582906789246
+    second: HeartbeatDisappear_224_28_28
+  - first:
+      213: -3087030565398585529
+    second: HeartbeatDisappear_224_28_29
+  - first:
+      213: 6084625531549522147
+    second: HeartbeatDisappear_224_28_30
+  - first:
+      213: 8262705975353568122
+    second: HeartbeatDisappear_224_28_31
+  - first:
+      213: 231494425025214653
+    second: HeartbeatDisappear_224_28_32
+  - first:
+      213: 7041453691492546723
+    second: HeartbeatDisappear_224_28_33
+  - first:
+      213: -1843325025257361574
+    second: HeartbeatDisappear_224_28_34
+  - first:
+      213: 1331679508469489528
+    second: HeartbeatDisappear_224_28_35
+  - first:
+      213: -6141516135858497568
+    second: HeartbeatDisappear_224_28_36
+  - first:
+      213: -8315636655212069121
+    second: HeartbeatDisappear_224_28_37
+  - first:
+      213: -808585906296715755
+    second: HeartbeatDisappear_224_28_38
+  - first:
+      213: -2579397664053426862
+    second: HeartbeatDisappear_224_28_39
+  - first:
+      213: 3350341656302459899
+    second: HeartbeatDisappear_224_28_40
+  - first:
+      213: -5081856889637585995
+    second: HeartbeatDisappear_224_28_41
+  - first:
+      213: -7604992200802388017
+    second: HeartbeatDisappear_224_28_42
+  - first:
+      213: -2829793780477743676
+    second: HeartbeatDisappear_224_28_43
+  - first:
+      213: -4170942937707200809
+    second: HeartbeatDisappear_224_28_44
+  - first:
+      213: -260025769134422044
+    second: HeartbeatDisappear_224_28_45
+  - first:
+      213: -2037717599975648202
+    second: HeartbeatDisappear_224_28_46
+  - first:
+      213: 7443213197514718919
+    second: HeartbeatDisappear_224_28_47
+  - first:
+      213: 2011869155201773059
+    second: HeartbeatDisappear_224_28_48
+  - first:
+      213: 4444969717678826288
+    second: HeartbeatDisappear_224_28_49
+  - first:
+      213: -1489617545178414355
+    second: HeartbeatDisappear_224_28_50
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 1
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 4
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: HeartbeatDisappear_224_28_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 224
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82ef866e4154f6e00800000000000000
+      internalID: 1040125995013176872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HeartbeatDisappear_224_28_1
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 0
+        width: 224
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf4b7039e9481c090800000000000000
+      internalID: -8015980045136317189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HeartbeatDisappear_224_28_2
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 0
+        width: 224
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9259133e743267d00800000000000000
+      internalID: 970001561406248233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HeartbeatDisappear_224_28_3
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 0
+        width: 224
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df81d62d8359cadc0800000000000000
+      internalID: -3626359528659019523
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HeartbeatDisappear_224_28_4
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 0
+        width: 224
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a566f9d44789dfe0800000000000000
+      internalID: -1163750298914232924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HeartbeatDisappear_224_28_5
+      rect:
+        serializedVersion: 2
+        x: 1120
+        y: 0
+        width: 224
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba8501326fe6637d0800000000000000
+      internalID: -2939039703383385941
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 694ccd2ec97efab49b01f78b80c7b0a8
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      HeartbeatDisappear_224_28_0: 1040125995013176872
+      HeartbeatDisappear_224_28_1: -8015980045136317189
+      HeartbeatDisappear_224_28_2: 970001561406248233
+      HeartbeatDisappear_224_28_3: -3626359528659019523
+      HeartbeatDisappear_224_28_4: -1163750298914232924
+      HeartbeatDisappear_224_28_5: -2939039703383385941
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

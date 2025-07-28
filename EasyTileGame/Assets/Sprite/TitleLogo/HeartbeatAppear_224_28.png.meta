@@ -1,0 +1,421 @@
+fileFormatVersion: 2
+guid: cc0609c189da5b540b4df3df8350ad63
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5029893815515244119
+    second: HeartbeatAppear_224_28_0
+  - first:
+      213: -4086725049035084893
+    second: HeartbeatAppear_224_28_1
+  - first:
+      213: -8612661267623879035
+    second: HeartbeatAppear_224_28_2
+  - first:
+      213: 3090907663092716852
+    second: HeartbeatAppear_224_28_3
+  - first:
+      213: -2751540653333403206
+    second: HeartbeatAppear_224_28_4
+  - first:
+      213: 1855719850323024418
+    second: HeartbeatAppear_224_28_5
+  - first:
+      213: 2513421359504229419
+    second: HeartbeatAppear_224_28_6
+  - first:
+      213: -7453988108336871618
+    second: HeartbeatAppear_224_28_7
+  - first:
+      213: -733102236353136598
+    second: HeartbeatAppear_224_28_8
+  - first:
+      213: 7778363968381646499
+    second: HeartbeatAppear_224_28_9
+  - first:
+      213: 310766556435727282
+    second: HeartbeatAppear_224_28_10
+  - first:
+      213: -1471078827573052726
+    second: HeartbeatAppear_224_28_11
+  - first:
+      213: -4211339041239483099
+    second: HeartbeatAppear_224_28_12
+  - first:
+      213: -1534772083580064526
+    second: HeartbeatAppear_224_28_13
+  - first:
+      213: 1195925984381489537
+    second: HeartbeatAppear_224_28_14
+  - first:
+      213: -6152414039583668771
+    second: HeartbeatAppear_224_28_15
+  - first:
+      213: -6211920039805123750
+    second: HeartbeatAppear_224_28_16
+  - first:
+      213: -8143125062726627999
+    second: HeartbeatAppear_224_28_17
+  - first:
+      213: 5996536035220309044
+    second: HeartbeatAppear_224_28_18
+  - first:
+      213: -1439653513501689039
+    second: HeartbeatAppear_224_28_19
+  - first:
+      213: 1866639830967369425
+    second: HeartbeatAppear_224_28_20
+  - first:
+      213: -5130977912005874130
+    second: HeartbeatAppear_224_28_21
+  - first:
+      213: 7701813531951693122
+    second: HeartbeatAppear_224_28_22
+  - first:
+      213: 1015183362017250552
+    second: HeartbeatAppear_224_28_23
+  - first:
+      213: -6568963127519641368
+    second: HeartbeatAppear_224_28_24
+  - first:
+      213: -5163503072584428574
+    second: HeartbeatAppear_224_28_25
+  - first:
+      213: -8486777889681262722
+    second: HeartbeatAppear_224_28_26
+  - first:
+      213: 2478698251330903749
+    second: HeartbeatAppear_224_28_27
+  - first:
+      213: 3965481186785252696
+    second: HeartbeatAppear_224_28_28
+  - first:
+      213: 3542600774231659657
+    second: HeartbeatAppear_224_28_29
+  - first:
+      213: 4007500385493435052
+    second: HeartbeatAppear_224_28_30
+  - first:
+      213: 2993571621985722039
+    second: HeartbeatAppear_224_28_31
+  - first:
+      213: -654908916623387748
+    second: HeartbeatAppear_224_28_32
+  - first:
+      213: -5661961563547603119
+    second: HeartbeatAppear_224_28_33
+  - first:
+      213: -5256583609113851052
+    second: HeartbeatAppear_224_28_34
+  - first:
+      213: 751254238745003685
+    second: HeartbeatAppear_224_28_35
+  - first:
+      213: 528857290320586067
+    second: HeartbeatAppear_224_28_36
+  - first:
+      213: -1455391986659017008
+    second: HeartbeatAppear_224_28_37
+  - first:
+      213: -6673747333642564583
+    second: HeartbeatAppear_224_28_38
+  - first:
+      213: -3030177805493119359
+    second: HeartbeatAppear_224_28_39
+  - first:
+      213: -7616654762589464415
+    second: HeartbeatAppear_224_28_40
+  - first:
+      213: 6964053377164126052
+    second: HeartbeatAppear_224_28_41
+  - first:
+      213: -2175179417518658153
+    second: HeartbeatAppear_224_28_42
+  - first:
+      213: 3210186265358766351
+    second: HeartbeatAppear_224_28_43
+  - first:
+      213: -5741923902775057732
+    second: HeartbeatAppear_224_28_44
+  - first:
+      213: -6079158683189399378
+    second: HeartbeatAppear_224_28_45
+  - first:
+      213: -2143452771330538812
+    second: HeartbeatAppear_224_28_46
+  - first:
+      213: 3301186602982182213
+    second: HeartbeatAppear_224_28_47
+  - first:
+      213: -1554123287347021174
+    second: HeartbeatAppear_224_28_48
+  - first:
+      213: -7863017747545440587
+    second: HeartbeatAppear_224_28_49
+  - first:
+      213: 5648367965862949338
+    second: HeartbeatAppear_224_28_50
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 1
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 4
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: HeartbeatAppear_224_28_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 224
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a9974c693a323ab0800000000000000
+      internalID: -5029893815515244119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HeartbeatAppear_224_28_1
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 0
+        width: 224
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3aba29568390947c0800000000000000
+      internalID: -4086725049035084893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HeartbeatAppear_224_28_2
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 0
+        width: 224
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58e538c753ea97880800000000000000
+      internalID: -8612661267623879035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HeartbeatAppear_224_28_3
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 0
+        width: 224
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4359c2ca42c15ea20800000000000000
+      internalID: 3090907663092716852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HeartbeatAppear_224_28_4
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 0
+        width: 224
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab92405aa5090d9d0800000000000000
+      internalID: -2751540653333403206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HeartbeatAppear_224_28_5
+      rect:
+        serializedVersion: 2
+        x: 1120
+        y: 0
+        width: 224
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22a15213f57d0c910800000000000000
+      internalID: 1855719850323024418
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: e1fcaf37b2e53a2439608d7b636e8c62
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      HeartbeatAppear_224_28_0: -5029893815515244119
+      HeartbeatAppear_224_28_1: -4086725049035084893
+      HeartbeatAppear_224_28_2: -8612661267623879035
+      HeartbeatAppear_224_28_3: 3090907663092716852
+      HeartbeatAppear_224_28_4: -2751540653333403206
+      HeartbeatAppear_224_28_5: 1855719850323024418
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

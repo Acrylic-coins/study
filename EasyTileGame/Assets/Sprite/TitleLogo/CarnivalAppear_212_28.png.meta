@@ -1,0 +1,361 @@
+fileFormatVersion: 2
+guid: b83d288b3a755e94abc87ef411bfdf7f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -230476444253191899
+    second: CarnivalAppear_212_28_0
+  - first:
+      213: 541274104574276506
+    second: CarnivalAppear_212_28_1
+  - first:
+      213: -550682098953559317
+    second: CarnivalAppear_212_28_2
+  - first:
+      213: -5907911505854078363
+    second: CarnivalAppear_212_28_3
+  - first:
+      213: -2538624017525813161
+    second: CarnivalAppear_212_28_4
+  - first:
+      213: -6903615189692776879
+    second: CarnivalAppear_212_28_5
+  - first:
+      213: -5914941121078494535
+    second: CarnivalAppear_212_28_6
+  - first:
+      213: 9130847348832557109
+    second: CarnivalAppear_212_28_7
+  - first:
+      213: -5796052780101741948
+    second: CarnivalAppear_212_28_8
+  - first:
+      213: 2598358108316910634
+    second: CarnivalAppear_212_28_9
+  - first:
+      213: -127691879821054240
+    second: CarnivalAppear_212_28_10
+  - first:
+      213: -6840859600581793123
+    second: CarnivalAppear_212_28_11
+  - first:
+      213: 6815501554255024177
+    second: CarnivalAppear_212_28_12
+  - first:
+      213: -6764034116467070392
+    second: CarnivalAppear_212_28_13
+  - first:
+      213: 5441525869880795399
+    second: CarnivalAppear_212_28_14
+  - first:
+      213: -6685094027431633716
+    second: CarnivalAppear_212_28_15
+  - first:
+      213: -6270061545580719012
+    second: CarnivalAppear_212_28_16
+  - first:
+      213: 8840081407758668765
+    second: CarnivalAppear_212_28_17
+  - first:
+      213: -4123125339237481350
+    second: CarnivalAppear_212_28_18
+  - first:
+      213: -7552706895826761560
+    second: CarnivalAppear_212_28_19
+  - first:
+      213: -8740484441808830770
+    second: CarnivalAppear_212_28_20
+  - first:
+      213: -1487621485076000150
+    second: CarnivalAppear_212_28_21
+  - first:
+      213: -7142292360899405385
+    second: CarnivalAppear_212_28_22
+  - first:
+      213: 8491128966391285241
+    second: CarnivalAppear_212_28_23
+  - first:
+      213: 5931404362392026218
+    second: CarnivalAppear_212_28_24
+  - first:
+      213: -1727091705622276366
+    second: CarnivalAppear_212_28_25
+  - first:
+      213: 5222434198951009788
+    second: CarnivalAppear_212_28_26
+  - first:
+      213: -9060089069633960924
+    second: CarnivalAppear_212_28_27
+  - first:
+      213: -5440846965859566913
+    second: CarnivalAppear_212_28_28
+  - first:
+      213: 8235124806541785774
+    second: CarnivalAppear_212_28_29
+  - first:
+      213: 8034716645032029441
+    second: CarnivalAppear_212_28_30
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 1
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 4
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: CarnivalAppear_212_28_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 212
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 521813325ee2dccf0800000000000000
+      internalID: -230476444253191899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CarnivalAppear_212_28_1
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 0
+        width: 212
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9374492eedf28700800000000000000
+      internalID: 541274104574276506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CarnivalAppear_212_28_2
+      rect:
+        serializedVersion: 2
+        x: 424
+        y: 0
+        width: 212
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be2e4b37c859b58f0800000000000000
+      internalID: -550682098953559317
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CarnivalAppear_212_28_3
+      rect:
+        serializedVersion: 2
+        x: 636
+        y: 0
+        width: 212
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 562ef1179c1e20ea0800000000000000
+      internalID: -5907911505854078363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CarnivalAppear_212_28_4
+      rect:
+        serializedVersion: 2
+        x: 848
+        y: 0
+        width: 212
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 750591108eef4ccd0800000000000000
+      internalID: -2538624017525813161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CarnivalAppear_212_28_5
+      rect:
+        serializedVersion: 2
+        x: 1060
+        y: 0
+        width: 212
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fbbe0c196e0364147a1c512f16017272
+      internalID: -581230305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: cd9bb6d1cbf182e4684a84d094b20fa5
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      CarnivalAppear_212_28_0: -230476444253191899
+      CarnivalAppear_212_28_1: 541274104574276506
+      CarnivalAppear_212_28_2: -550682098953559317
+      CarnivalAppear_212_28_3: -5907911505854078363
+      CarnivalAppear_212_28_4: -2538624017525813161
+      CarnivalAppear_212_28_5: -581230305
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
