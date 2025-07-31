@@ -371,4 +371,9 @@ public class ResourceLoadingScript : MonoBehaviour
 	{
 		SceneManager.LoadScene(str);
 	}
+
+	public ResourceOrder GetResourceOrder(int index)
+	{
+		return resourceOrders[index];
+	}
 }
