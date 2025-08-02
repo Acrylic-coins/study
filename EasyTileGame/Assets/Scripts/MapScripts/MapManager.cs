@@ -107,8 +107,8 @@ public class MapManager : MonoBehaviour
         string oS = obj.GetComponent<TileAttribute>().strObj;
         string eS = obj.GetComponent<TileAttribute>().strEle;
 
-        Sprite s0 = tileSprDic.FirstOrDefault(s => s.Key.Contains(oS) && s.Key.Contains(eS) && s.Key.Contains("_0")).Value;
-        Sprite s1 = tileSprDic.FirstOrDefault(s => s.Key.Contains(oS) && s.Key.Contains(eS) && s.Key.Contains("_1")).Value;
+        Sprite s0 = tileSprDic.FirstOrDefault(s => s.Key.Contains(oS) && s.Key.Contains(eS) && s.Key.EndsWith("_0")).Value;
+        Sprite s1 = tileSprDic.FirstOrDefault(s => s.Key.Contains(oS) && s.Key.Contains(eS) && s.Key.EndsWith("_1")).Value;
 
         obj.GetComponent<TileAttribute>().InitSprite(s0, s1);
 	}
