@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using Random = UnityEngine.Random;
+using System.Linq;
 
 public class MapManager : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class MapManager : MonoBehaviour
     private WaitForSeconds term = new WaitForSeconds(0.05f);
     private Coroutine firstCo;
 
+    private Dictionary<string, Sprite> tileSprDic = new Dictionary<string, Sprite>();
     private List<Type> tileEleList = new List<Type>();
 
     private bool isMakeMap = false; // 맵생성 함수가 호출되었는지 여부. true라면 더 호출할 수 없음
@@ -38,12 +40,10 @@ public class MapManager : MonoBehaviour
 		isMakeMap = true;
         // GetResourceOrder함수는 원하는 리소스를 ResourceLoadingScript에 요구하는 기능임
         tilePrefabTrans = ResourceLoadingScript.Instance.GetResourceOrder(0).transform;
+        tileSprDic = ResourceLoadingScript.Instance.GetResourceOrder(0).GetSprite();
 
-        int x = 72;
-        int y = -72;
-
-        // 오브젝트들을 가져옴
-        while(tilePrefabTrans.childCount > 0)
+		// 오브젝트들을 가져옴
+		while (tilePrefabTrans.childCount > 0)
         {
             tilePrefabTrans.GetChild(0).parent = tileParentFalseTrans;
         }
@@ -103,5 +103,13 @@ public class MapManager : MonoBehaviour
     private void SettingPrefab(GameObject obj)
     {
         obj.AddComponent(tileEleList[Random.Range(0, tileEleList.Count)]);
-    }
+
+        string oS = obj.GetComponent<TileAttribute>().strObj;
+        string eS = obj.GetComponent<TileAttribute>().strEle;
+
+        Sprite s0 = tileSprDic.FirstOrDefault(s => s.Key.Contains(oS) && s.Key.Contains(eS) && s.Key.Contains("_0")).Value;
+        Sprite s1 = tileSprDic.FirstOrDefault(s => s.Key.Contains(oS) && s.Key.Contains(eS) && s.Key.Contains("_1")).Value;
+
+        obj.GetComponent<TileAttribute>().InitSprite(s0, s1);
+	}
 }

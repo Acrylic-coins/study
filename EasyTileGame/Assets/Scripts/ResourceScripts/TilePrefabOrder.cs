@@ -46,7 +46,7 @@ public class TilePrefabOrder : ResourceOrder
     {
 
     }
-	public override void SetSpriteResource(List<Sprite> spr, int code)
+	override public void SetSpriteResource(List<Sprite> spr, int code)
 	{
 		switch(code)
         {
@@ -61,4 +61,9 @@ public class TilePrefabOrder : ResourceOrder
                 break;
         }
 	}
+
+	override public Dictionary<string, Sprite> GetSprite()
+    {
+        return sprDic;
+    }
 }

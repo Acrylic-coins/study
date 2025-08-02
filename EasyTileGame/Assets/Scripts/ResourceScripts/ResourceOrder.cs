@@ -19,6 +19,9 @@ abstract public class ResourceOrder : MonoBehaviour
 	{
 		return resourceOrder;
 	}
-
+	virtual public Dictionary<string,Sprite> GetSprite()
+	{
+		return null;
+	}
 	
 }
