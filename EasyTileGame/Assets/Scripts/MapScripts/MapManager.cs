@@ -1,6 +1,9 @@
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using System.Collections.Generic;
+using System;
+using Random = UnityEngine.Random;
 
 public class MapManager : MonoBehaviour
 {
@@ -14,6 +17,8 @@ public class MapManager : MonoBehaviour
     private WaitForSeconds term = new WaitForSeconds(0.05f);
     private Coroutine firstCo;
 
+    private List<Type> tileEleList = new List<Type>();
+
     private bool isMakeMap = false; // 맵생성 함수가 호출되었는지 여부. true라면 더 호출할 수 없음
 
     void Awake()
@@ -22,6 +27,8 @@ public class MapManager : MonoBehaviour
         tileParentFalseTrans = tileParentFalse.transform;
 
         firstCo = null;
+        tileEleList = FindSubClass.FindSubclassOf<TileAttribute>();
+        
     }
 
     // 준비된 오브젝트들과 주소를 통해 맵을 만듦
@@ -62,11 +69,14 @@ public class MapManager : MonoBehaviour
             {
                 if (tileParentFalseTrans.childCount > 0)
                 {
-                    tileParentFalseTrans.GetChild(0).gameObject.SetActive(true);
-                    tileParentFalseTrans.GetChild(0).localPosition = new Vector3(72 - ((indX - j) * 16), -72 + (((indY + j)) * 16), 0f);
-                    tileParentFalseTrans.GetChild(0).parent = tileParentTrans;
-                }
+                    GameObject ob = tileParentFalseTrans.GetChild(0).gameObject;
 
+                    ob.SetActive(true);
+                    ob.transform.localPosition = new Vector3(72 - ((indX - j) * 16), -72 + (((indY + j)) * 16), 0f);
+                    ob.transform.parent = tileParentTrans;
+                    SettingPrefab(ob);
+
+				}
             }
 			yield return term;
 		}
@@ -76,15 +86,22 @@ public class MapManager : MonoBehaviour
         {
             for (int j = 10; j < 15; j++)
             {
-                tileParentFalseTrans.GetChild(0).gameObject.SetActive(true);
-                tileParentFalseTrans.GetChild(0).localPosition = new Vector3(72 - (i * 16), -72 + (j * 16), 0f);
-                tileParentFalseTrans.GetChild(0).parent = tileParentTrans;
+                GameObject ob = tileParentFalseTrans.GetChild(0).gameObject;
+
+                ob.SetActive(true);
+                ob.transform.localPosition = new Vector3(72 - (i * 16), -72 + (j * 16), 0f);
+				ob.transform.parent = tileParentTrans;
+				SettingPrefab(ob);
             }
         }
 
         StopCoroutine(firstCo);
 
-
         yield return null;
+    }
+
+    private void SettingPrefab(GameObject obj)
+    {
+        obj.AddComponent(tileEleList[Random.Range(0, tileEleList.Count)]);
     }
 }
