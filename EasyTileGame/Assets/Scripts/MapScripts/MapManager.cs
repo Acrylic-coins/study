@@ -10,6 +10,7 @@ public class MapManager : MonoBehaviour
 {
     [SerializeField] private GameObject tileParent; // 해당 오브젝트 내 자식오브젝트. 활성화 타일 오브젝트들은 해당 오브젝트의 자식임
     [SerializeField] private GameObject tileParentFalse; // 해당 오브젝트 내 자식오브젝트. 비활성화 타일 오브젝트들은 해당 오브젝트의 자식임
+    [SerializeField] private GameObject playerObj;  // 맵 생성 후 플레이어를 부르기 위함
 
     private Transform tileParentTrans;  // tileParent의 transform
     private Transform tileParentFalseTrans; // tileParentFalse의 transform
@@ -17,6 +18,7 @@ public class MapManager : MonoBehaviour
 
     private WaitForSeconds term = new WaitForSeconds(0.05f);
     private Coroutine firstCo;
+    private Coroutine playerCo;
 
     private Dictionary<string, Sprite> tileSprDic = new Dictionary<string, Sprite>();
     private List<Type> tileEleList = new List<Type>();
@@ -29,6 +31,7 @@ public class MapManager : MonoBehaviour
         tileParentFalseTrans = tileParentFalse.transform;
 
         firstCo = null;
+        playerCo = null;
         tileEleList = FindSubClass.FindSubclassOf<TileAttribute>();
         
     }
@@ -50,9 +53,8 @@ public class MapManager : MonoBehaviour
 
         // 코루틴 호출 -> 타일을 텀을 두고 순차적으로 생성하기 위함
 		firstCo = StartCoroutine(SettingFirstTiles());
-
     }
-
+    // 처음에 등장해야되는 타일 150개를 활성화시키는 코루틴임
     IEnumerator SettingFirstTiles()
     {
         int indX = 0;
@@ -95,11 +97,20 @@ public class MapManager : MonoBehaviour
             }
         }
 
+        for (int i = 0; i < 10; i++)
+        {
+            yield return term;
+        }
+
+        playerCo = StartCoroutine(ActivePlayer());
+
+        // 이 코루틴을 종료함
         StopCoroutine(firstCo);
 
         yield return null;
     }
 
+    // 생성한 타일에 알맞는 컴포넌트를 부착함. 컴포넌트에는 타일에 대한 속성과 그에 따른 규칙이 담김
     private void SettingPrefab(GameObject obj)
     {
         obj.AddComponent(tileEleList[Random.Range(0, tileEleList.Count)]);
@@ -112,4 +123,17 @@ public class MapManager : MonoBehaviour
 
         obj.GetComponent<TileAttribute>().InitSprite(s0, s1);
 	}
+
+    IEnumerator ActivePlayer()
+    {
+        // 텀을 두지 않으면 코루틴을 반환하기도 전에 종료되서 playerCo가 null이 됨
+        yield return term;
+
+        playerObj.SetActive(true);
+        playerObj.transform.localPosition = new Vector3(8f, -8f - (16f * 3f), 0f);;
+
+        StopCoroutine(playerCo);
+
+        yield return null;
+    }
 }

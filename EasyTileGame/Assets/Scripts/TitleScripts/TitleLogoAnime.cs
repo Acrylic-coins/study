@@ -101,6 +101,8 @@ public class TitleLogoAnime : MonoBehaviour
 
     public void DisappearTitleLogo()
     {
+        if (!isLogoEffect) { return; }
+
         isLogoEffect = false;
 
 		carnivalAnimator.SetTrigger("IsDisappear");
