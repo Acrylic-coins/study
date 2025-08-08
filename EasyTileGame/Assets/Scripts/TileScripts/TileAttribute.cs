@@ -14,14 +14,14 @@ abstract public class TileAttribute : MonoBehaviour
 	protected SpriteRenderer sprOnRen;
 
 	protected Sprite deSpr;	// 밟지 않았을 때 스프라이트
-	protected Sprite liSpr;	// 밟아서 빛날 때 스프라이트
+	protected Sprite liSpr; // 밟아서 빛날 때 스프라이트
+
 	public string strObj { get { return "MainTile"; } private set { } }
 	public string strEle { get; protected set; }
-
 	public bool isEffect = false;
 
-	// 타일에 필요한 스프라이트를 갱신함
-	public void InitSprite(Sprite defaultSpr, Sprite lightSpr)
+    // 타일에 필요한 스프라이트를 갱신함
+    public void InitSprite(Sprite defaultSpr, Sprite lightSpr)
 	{
 		// 기본 타일 스프라이트를 위한 SpriteRenderer 캐시
 		sprRen = this.gameObject.GetComponent<SpriteRenderer>();

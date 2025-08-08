@@ -3,14 +3,25 @@ using System.Collections;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] private SpriteRenderer playerSpr;
+    [SerializeField] private GameObject playerReadyEffectObj;
 
+    [SerializeField] private SpriteRenderer playerSpr;
+    [SerializeField] private BoxCollider2D playerColider;
+
+
+    public bool isPlayerReady { get; private set; } // 플레이어가 움직일 준비가 되었는지 여부(false면 움직일 수 없음)
+
+    private bool isResizeCollidercoEnd = false;
     private Coroutine appearEffectCo;
+    private Coroutine resizeColliderCo;
+
     private WaitForSeconds term;
     private void Awake()
     {
         term = new WaitForSeconds(0.01f);
         playerSpr.material.SetFloat("_MultiSpriteCnt", 21f);
+
+        isPlayerReady = false;
     }
 
     private void Start()
@@ -20,6 +31,9 @@ public class Player : MonoBehaviour
     // 등장시 연출을 위한 코루틴
     IEnumerator AppearEffect()
     {
+        isResizeCollidercoEnd = false;
+        isPlayerReady = false;
+
         yield return term;
         playerSpr.material.SetFloat("_IsMain", 0f);
         yield return term;
@@ -28,7 +42,7 @@ public class Player : MonoBehaviour
         int temA = 0;
         int temB = 0;
         int temC = 0;
-        float corrK = 1f;
+        float corrK = 0.7f;
 
         for (int i = 0; i < 35; i++)
         {
@@ -70,6 +84,13 @@ public class Player : MonoBehaviour
                 playerSpr.material.SetFloat("_IsMainAlpha", 1f);
             }
 
+            if (i == 12)
+            {
+                playerReadyEffectObj.SetActive(true);
+
+                resizeColliderCo = StartCoroutine(ResizeColider());
+            }
+
             if (i > 9)
             {
                 int i2 = i - 9;
@@ -100,18 +121,53 @@ public class Player : MonoBehaviour
         playerSpr.material.SetColor("_MainColorOffset", Color.white);
 
         float rgb = 255f;
-        for (int i = 0; i < 40; i++)
+
+        for (int i = 0; i < 60; i++)
         {
             rgb = rgb <= 0 ? 0 : rgb - 4f;
             playerSpr.material.SetColor("_MainColorOffset", new Color(rgb / 255f, rgb / 255f, rgb/ 255f));
 
             yield return term;
+
+            if (i == 20)
+            {
+                playerReadyEffectObj.SetActive(false);
+
+                isResizeCollidercoEnd = true;
+            }
         }
 
         playerSpr.material.SetColor("_MainColorOffset", Color.black);
 
+        isPlayerReady = false;
 
         StopCoroutine(appearEffectCo);
+
+
+        yield return null;
+    }
+
+    IEnumerator ResizeColider()
+    {
+        float k = 0;
+
+        while (true)
+        {
+            k = k < 2f ? k + 0.2f : 2f; 
+
+            for (int i = 0; i < 30 - k; i++)
+            {
+                playerColider.size = new Vector2((float)(4 + i * (9f + (3f * k))), (float)(4 + i * (9f + (3f * k))));
+                yield return term;
+            }
+
+            playerColider.size.Set(4f, 4f);
+
+            if (isResizeCollidercoEnd)
+            {
+                StopCoroutine(resizeColliderCo);
+            }
+        }
 
         yield return null;
     }
