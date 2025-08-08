@@ -130,7 +130,7 @@ public class MapManager : MonoBehaviour
         yield return term;
 
         playerObj.SetActive(true);
-        playerObj.transform.localPosition = new Vector3(8f, -8f - (16f * 3f), 0f);;
+        playerObj.transform.localPosition = new Vector3(8f, -(16f * 3f), 0f);;
 
         StopCoroutine(playerCo);
 
