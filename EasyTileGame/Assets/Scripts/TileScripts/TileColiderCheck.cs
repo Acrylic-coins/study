@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System;
 
+// 타일에 특정 콜라이더가 감지될 때 발동하는 함수를 담은 클래스
 public class TileColiderCheck : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer lightTileSpr;

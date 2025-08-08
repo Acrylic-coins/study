@@ -139,7 +139,9 @@ public class Player : MonoBehaviour
 
         playerSpr.material.SetColor("_MainColorOffset", Color.black);
 
-        isPlayerReady = false;
+        yield return term;
+
+        isPlayerReady = true;
 
         StopCoroutine(appearEffectCo);
 
