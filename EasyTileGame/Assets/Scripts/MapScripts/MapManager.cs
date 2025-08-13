@@ -11,6 +11,7 @@ public class MapManager : MonoBehaviour
     [SerializeField] private GameObject tileParent; // 해당 오브젝트 내 자식오브젝트. 활성화 타일 오브젝트들은 해당 오브젝트의 자식임
     [SerializeField] private GameObject tileParentFalse; // 해당 오브젝트 내 자식오브젝트. 비활성화 타일 오브젝트들은 해당 오브젝트의 자식임
     [SerializeField] private GameObject playerObj;  // 맵 생성 후 플레이어를 부르기 위함
+    [SerializeField] private GameObject coordObj;   // 좌표를 탐지하는 게임오브젝트
 
     private Transform tileParentTrans;  // tileParent의 transform
     private Transform tileParentFalseTrans; // tileParentFalse의 transform
@@ -128,6 +129,23 @@ public class MapManager : MonoBehaviour
     {
         // 텀을 두지 않으면 코루틴을 반환하기도 전에 종료되서 playerCo가 null이 됨
         yield return term;
+
+        //----------------------------좌표 탐지기 활성화--------------------------------------------
+        coordObj.SetActive(true);
+
+        GameObject obX = coordObj.transform.GetChild(0).gameObject;
+        GameObject obY = coordObj.transform.GetChild(1).gameObject;
+
+        for (int i = 0; i < Constant.TILEXCOUNT; i++)
+        {
+            obX.transform.GetChild(i).GetComponent<CheckCoordinate>().SettingCoord(i, -1);
+        }
+
+        for (int i = 0; i < Constant.TILEYCOUNT; i++)
+        {
+            obY.transform.GetChild(i).GetComponent<CheckCoordinate>().SettingCoord(-1, i);
+        }
+        //-------------------------------------------------------------------------------------------
 
         playerObj.SetActive(true);
         playerObj.transform.localPosition = new Vector3(8f, -((float)Constant.TILESIZE * 3f), 0f);;

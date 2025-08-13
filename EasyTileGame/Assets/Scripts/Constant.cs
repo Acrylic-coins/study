@@ -5,6 +5,8 @@ using System.Collections.Generic;
 public static class Constant
 {
 	public static readonly int TILESIZE = 16;
+	public static readonly int TILEXCOUNT = 10;
+	public static readonly int TILEYCOUNT = 10;
 
 	public enum TileType { NONE = -1, FIRE, SOIL, THUNDER, PLANT, ICE, METAL, DARK, LIGHT, NOTHING, ALL };
 	// 리소스 주문 방식을 위한 열거형. SELECT면 orderName과 일치한 주소에 가고, ALL이면 orderName을 포함한 모든 주소에 가서 가져옴

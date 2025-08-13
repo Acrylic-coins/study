@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 
-
+// 플레이어의 이동을 다루는 스크립트
 public class PlayerMove : MonoBehaviour
 {
     private enum Arrow { NONE, UP, DOWN, LEFT, RIGHT };  // 어느 방향키가 눌렸는지 확인하기 위한 열거형
@@ -28,8 +28,16 @@ public class PlayerMove : MonoBehaviour
     private float timeGage; // 한번 이동하는데 걸리는 시간
     private float timeLine; // 현재 이동시간 진행비율
 
+    private int nowCoordX;  // 현재 타일 X좌표 위치
+    private int nowCoordY;  // 현재 타일 Y좌표 위치
+
     private bool isReadyMove = false;   // 이동 가능한 상황인지를 나타냄
     private bool isMoving = false; // 현재 한 방향으로 이동중임을 나타냄
+
+    private bool isMoveUp = true;   // 위쪽으로 이동가능한지 여부를 나타냄
+    private bool isMoveDown = true; // 아래쪽으로 이동가능한지 여부를 나타냄
+    private bool isMoveLeft = true; // 왼쪽으로 이동가능한지 여부를 나타냄
+    private bool isMoveRight = true;    // 오른쪽으로 이동가능한지 여부를 나타냄
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -39,6 +47,9 @@ public class PlayerMove : MonoBehaviour
         playerScr = this.GetComponent<Player>();
 
         startPos = playerTrans.position;
+
+        nowCoordX = 5;
+        nowCoordY = 1;
 
         timeGage = 1f;
         timeLapse = 0f;
@@ -87,15 +98,16 @@ public class PlayerMove : MonoBehaviour
 
     IEnumerator MoveCo()
     {
-        Debug.Log(arrowList.Count);
         // 움직일 방향이 없으면 코루틴 종료
         if (arrowList.Count <= 0) { yield return oneFrame; StopCoroutine(moveCo); }
 
-
-
-
         while (arrowList.Count > 0)
         {
+            if (!isMoveUp && arrowList[0] == Arrow.UP) { yield return oneFrame; arrowList.RemoveAt(0); break; }
+            if (!isMoveDown && arrowList[0] == Arrow.DOWN) { yield return oneFrame; arrowList.RemoveAt(0); break; }
+            if (!isMoveLeft && arrowList[0] == Arrow.LEFT) { yield return oneFrame; arrowList.RemoveAt(0); break; }
+            if (!isMoveRight && arrowList[0] == Arrow.RIGHT) { yield return oneFrame; arrowList.RemoveAt(0); break; }
+
             // 여기까지 진입한 시점부터 이동중인 것으로 된다.
             isMoving = true;
 
@@ -154,7 +166,6 @@ public class PlayerMove : MonoBehaviour
                 }
 
                 playerTrans.position = startPos + moveVector;
-                Debug.Log(moveX - (float)Constant.TILESIZE);
                 // 목표지점에 얼추 가까워지면 도착으로 간주, 이후 상황을 결정함
                 if ((float)Constant.TILESIZE - Mathf.Abs(moveX) < 0.05f)
                 {
@@ -185,4 +196,41 @@ public class PlayerMove : MonoBehaviour
         timeLine = 0f;
     }
 
+    public void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (!isReadyMove) { return; }
+
+        if (collision.tag.Equals("COORDX"))
+        {
+            nowCoordX = collision.GetComponent<CheckCoordinate>().coordX;
+
+            if (nowCoordX == 9) { isMoveRight = false; }
+            else if (nowCoordX == 0) { isMoveLeft = false; }
+            else { isMoveRight = true; isMoveLeft = true; }
+        }
+
+        if (collision.tag.Equals("COORDY"))
+        {
+            nowCoordY = collision.GetComponent<CheckCoordinate>().coordY;
+
+            if (nowCoordY == 9) { isMoveUp = false; }
+            else if (nowCoordY == 0) { isMoveDown = false; }
+            else { isMoveUp = true; isMoveDown = true; }
+        }
+    }
+
+    public void OnTriggerExit2D(Collider2D collision)
+    {
+        if (!isReadyMove) { return; }
+
+        if (collision.tag.Equals("COORDX"))
+        {
+            nowCoordX = -1;
+        }
+
+        if (collision.tag.Equals("COORDY"))
+        {
+            nowCoordY = -1;
+        }
+    }
 }
