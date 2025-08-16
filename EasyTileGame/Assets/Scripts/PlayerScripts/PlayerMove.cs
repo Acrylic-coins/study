@@ -21,6 +21,8 @@ public class PlayerMove : MonoBehaviour
 
     private Coroutine moveCo;
 
+    private Animator playerSprAnime;
+
     private Vector3 moveVector; // 이번 프레임에 이동해야 하는 벡터값
     private Vector3 startPos; // 타일 이동 시작 위치
 
@@ -43,6 +45,8 @@ public class PlayerMove : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
+        playerSprAnime = this.GetComponent<Animator>();
+
         playerTrans = this.transform;
         playerScr = this.GetComponent<Player>();
 
@@ -120,10 +124,10 @@ public class PlayerMove : MonoBehaviour
             float moveX = 0f;
             float moveY = 0f;
 
-            if (arr == Arrow.UP) { end = new Vector3(0f, 16f, 0f); }
-            else if (arr == Arrow.DOWN) { end = new Vector3(0f, -16f, 0f); }
-            else if (arr == Arrow.LEFT) { end = new Vector3(-16f, 0f, 0f); }
-            else if (arr == Arrow.RIGHT) { end = new Vector3(16f, 0f, 0f); }
+            if (arr == Arrow.UP) { end = new Vector3(0f, 16f, 0f); playerSprAnime.SetTrigger("IsFront"); }
+            else if (arr == Arrow.DOWN) { end = new Vector3(0f, -16f, 0f); playerSprAnime.SetTrigger("IsBack"); }
+            else if (arr == Arrow.LEFT) { end = new Vector3(-16f, 0f, 0f); playerSprAnime.SetTrigger("IsLeft"); }
+            else if (arr == Arrow.RIGHT) { end = new Vector3(16f, 0f, 0f); playerSprAnime.SetTrigger("IsRight"); }
 
             // 현재 이동중인 방향을 리스트에서 지워줌. 자리 비워줘야 선입력(1번까지만)할수있음
             arrowList.RemoveAt(0);
@@ -134,13 +138,14 @@ public class PlayerMove : MonoBehaviour
                 if (timeLapse == 0) { continue; }
 
                 timeLine = timeLapse / timeGage;
-
+                 
                 if (arr == Arrow.UP)
                 {
+                    // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 1.5인 사인그래프를 구함
+                    // 위 아래에 관해서는 진폭을 줄여서 움직임이 어색하지 않도록 함
                     moveX = Mathf.Lerp(moveX, Constant.TILESIZE, timeLine);
                     moveY = 1.5f * Mathf.Sin(Mathf.PI / 16f * moveX);
                     moveVector = new Vector3(moveY, moveX);
-                    
                 }
                 else if (arr == Arrow.DOWN)
                 {
@@ -181,6 +186,7 @@ public class PlayerMove : MonoBehaviour
 
         }
 
+        playerSprAnime.SetTrigger("IsEnd");
         //yield return oneFrame;
         StopCoroutine(moveCo);
 

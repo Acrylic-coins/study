@@ -8,19 +8,22 @@ public class Player : MonoBehaviour
     [SerializeField] private SpriteRenderer playerSpr;
     [SerializeField] private BoxCollider2D playerColider;
 
+    [SerializeField] private Texture2D playerTex;
 
     public bool isPlayerReady { get; private set; } // 플레이어가 움직일 준비가 되었는지 여부(false면 움직일 수 없음)
 
     private bool isResizeCollidercoEnd = false;
     private Coroutine appearEffectCo;
     private Coroutine resizeColliderCo;
+    private Material mar;
 
     private WaitForSeconds term;
     private void Awake()
     {
+        mar = playerSpr.material;
+
         term = new WaitForSeconds(0.01f);
         playerSpr.material.SetFloat("_MultiSpriteCnt", 21f);
-
         isPlayerReady = false;
     }
 
@@ -173,5 +176,4 @@ public class Player : MonoBehaviour
 
         yield return null;
     }
-
 }
