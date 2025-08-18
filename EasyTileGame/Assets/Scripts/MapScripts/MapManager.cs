@@ -12,10 +12,12 @@ public class MapManager : MonoBehaviour
     [SerializeField] private GameObject tileParentFalse; // 해당 오브젝트 내 자식오브젝트. 비활성화 타일 오브젝트들은 해당 오브젝트의 자식임
     [SerializeField] private GameObject playerObj;  // 맵 생성 후 플레이어를 부르기 위함
     [SerializeField] private GameObject coordObj;   // 좌표를 탐지하는 게임오브젝트
+    [SerializeField] private GameObject temObj; // 임시로 자식들을 보관하는 게임오브젝트
 
     private Transform tileParentTrans;  // tileParent의 transform
     private Transform tileParentFalseTrans; // tileParentFalse의 transform
     private Transform tilePrefabTrans;  // 사전에 저장해둔 tile 오브젝트들을 자식으로 둔 오브젝트의 transform
+    private Transform mapTrans; // 해당 오브젝트의 트랜스폼
 
     private WaitForSeconds term = new WaitForSeconds(0.05f);
     private Coroutine firstCo;
@@ -24,12 +26,17 @@ public class MapManager : MonoBehaviour
     private Dictionary<string, Sprite> tileSprDic = new Dictionary<string, Sprite>();
     private List<Type> tileEleList = new List<Type>();
 
+    private Vector3 startPos;
+
     private bool isMakeMap = false; // 맵생성 함수가 호출되었는지 여부. true라면 더 호출할 수 없음
 
     void Awake()
     {
+        mapTrans = this.transform;
         tileParentTrans = tileParent.transform;
         tileParentFalseTrans = tileParentFalse.transform;
+
+        startPos = mapTrans.position;
 
         firstCo = null;
         playerCo = null;
@@ -153,5 +160,25 @@ public class MapManager : MonoBehaviour
         StopCoroutine(playerCo);
 
         yield return null;
+    }
+
+    public void UpdateMapPosition(Vector3 move, bool isUpdate)
+    {
+        mapTrans.position = startPos - new Vector3(0f, move.y);
+
+        if (isUpdate)
+        {
+            while (mapTrans.childCount > 0)
+            {
+                mapTrans.GetChild(0).parent = temObj.transform;
+            }
+
+            mapTrans.position = Vector3.zero;
+
+            while (temObj.transform.childCount > 0)
+            {
+                temObj.transform.GetChild(0).parent = mapTrans;
+            }
+        }
     }
 }

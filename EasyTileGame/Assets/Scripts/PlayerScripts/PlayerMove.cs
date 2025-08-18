@@ -10,9 +10,12 @@ public class PlayerMove : MonoBehaviour
 {
     private enum Arrow { NONE, UP, DOWN, LEFT, RIGHT };  // 어느 방향키가 눌렸는지 확인하기 위한 열거형
 
-    private Transform playerTrans;
+    [SerializeField] GameObject mapManager;
+
+    private Transform playerTrans;  // 플레이어 오브젝트의 트랜스폼
 
     private Player playerScr;
+    private MapManager mapM; // 맵 오브젝트의 MapManager클래스
 
     private WaitForFixedUpdate oneFrame = new WaitForFixedUpdate();
 
@@ -32,6 +35,9 @@ public class PlayerMove : MonoBehaviour
 
     private int nowCoordX;  // 현재 타일 X좌표 위치
     private int nowCoordY;  // 현재 타일 Y좌표 위치
+    private int currentCoordX;  // 이전에 있었던 타일 X좌표 위치
+    private int currentCoordY;  // 이전에 있었던 타일 Y좌표 위치
+
 
     private bool isReadyMove = false;   // 이동 가능한 상황인지를 나타냄
     private bool isMoving = false; // 현재 한 방향으로 이동중임을 나타냄
@@ -41,19 +47,27 @@ public class PlayerMove : MonoBehaviour
     private bool isMoveLeft = true; // 왼쪽으로 이동가능한지 여부를 나타냄
     private bool isMoveRight = true;    // 오른쪽으로 이동가능한지 여부를 나타냄
 
+    private bool isMoveMap = false; // 현재 좌표를 이동시켜야 하는 것이 플레이어인지 맵인지 여부를 나타냄
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        playerSprAnime = this.GetComponent<Animator>();
+        // 초기화
+        mapM = mapManager.GetComponent<MapManager>();
 
-        playerTrans = this.transform;
-        playerScr = this.GetComponent<Player>();
+        playerSprAnime = this.GetComponent<Animator>(); // 플레이어의 애니메이터 컴포넌트 캐싱
 
-        startPos = playerTrans.position;
+        playerTrans = this.transform;   // 플레이어의 트랜스폼 캐싱
+        playerScr = this.GetComponent<Player>();    // 해당 오브젝트의 'Player' 클래스 캐싱
 
-        nowCoordX = 5;
-        nowCoordY = 1;
+        startPos = playerTrans.position;    // 플레이어의 시작위치를 정해줌
+
+        nowCoordX = 5;  // 플레이어의 타일 x좌표를 정해줌
+        nowCoordY = 1;  // 플레이어의 타일 y좌표를 정해줌
+
+        currentCoordX = nowCoordX;  // 플레이어의 이전 타일 x좌표를 정해줌
+        currentCoordY = nowCoordY;  // 플레이어의 이전 타일 y좌표를 정해줌
 
         timeGage = 1f;
         timeLapse = 0f;
@@ -131,58 +145,67 @@ public class PlayerMove : MonoBehaviour
 
             // 현재 이동중인 방향을 리스트에서 지워줌. 자리 비워줘야 선입력(1번까지만)할수있음
             arrowList.RemoveAt(0);
-
-            while (true)
-            {
-                timeLapse += Time.deltaTime;
-                if (timeLapse == 0) { continue; }
-
-                timeLine = timeLapse / timeGage;
-                 
-                if (arr == Arrow.UP)
+            // 현재 이동해야 하는 것이 무엇인지 결정함
+            // 플레이어가 특정 좌표보다 위쪽에 있다면 플레이어 대신 맵을 이동시킴
+            if (currentCoordY >= 4 && arr == Arrow.UP) { isMoveMap = true; }
+            else { isMoveMap = false; }
+                
+                // 매 프레임마다 이동거리 계산을 하고 플레이어의 좌표를 바꿔줌
+                while (true)
                 {
-                    // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 1.5인 사인그래프를 구함
-                    // 위 아래에 관해서는 진폭을 줄여서 움직임이 어색하지 않도록 함
-                    moveX = Mathf.Lerp(moveX, Constant.TILESIZE, timeLine);
-                    moveY = 1.5f * Mathf.Sin(Mathf.PI / 16f * moveX);
-                    moveVector = new Vector3(moveY, moveX);
-                }
-                else if (arr == Arrow.DOWN)
-                {
-                    // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 1.5인 사인그래프를 구함
-                    // 위 아래에 관해서는 진폭을 줄여서 움직임이 어색하지 않도록 함
-                    moveX = Mathf.Lerp(moveX, Constant.TILESIZE * -1f, timeLine);
-                    moveY = -1.5f * Mathf.Sin(Mathf.PI / 16f * moveX);
-                    moveVector = new Vector3(moveY, moveX);
-                }
-                else if (arr == Arrow.LEFT)
-                {
-                    // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 8인 사인그래프를 구함
-                    moveX = Mathf.Lerp(moveX, Constant.TILESIZE * -1f, timeLine);
-                    moveY = -8f * Mathf.Sin(Mathf.PI / 16f * moveX);
-                    moveVector = new Vector3(moveX, moveY);
-                }
-                else if (arr == Arrow.RIGHT)
-                {
-                    // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 8인 사인그래프를 구함
-                    moveX = Mathf.Lerp(moveX, Constant.TILESIZE, timeLine);
-                    moveY = 8f * Mathf.Sin(Mathf.PI / 16f * moveX);
-                    moveVector = new Vector3(moveX, moveY);
-                }
+                    // 현재 이동한 시간을 계산함                
+                    timeLapse += Time.deltaTime;
+                    // 만약 경과한 시간이 0초라면 시간이 지날 때까지 while문으로 돌아감
+                    if (timeLapse == 0) { continue; }
+                    // 시간에 따른 이동 상황이 몇%가 되어야 하는지 계산함
+                    timeLine = timeLapse / timeGage;
 
-                playerTrans.position = startPos + moveVector;
-                // 목표지점에 얼추 가까워지면 도착으로 간주, 이후 상황을 결정함
-                if ((float)Constant.TILESIZE - Mathf.Abs(moveX) < 0.05f)
-                {
-                    playerTrans.position = startPos + end;
+                    if (arr == Arrow.UP)
+                    {
+                        // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 1.5인 사인그래프를 구함
+                        // 위 아래에 관해서는 진폭을 줄여서 움직임이 어색하지 않도록 함
+                        moveX = Mathf.Lerp(moveX, Constant.TILESIZE, timeLine);
+                        moveY = 1.5f * Mathf.Sin(Mathf.PI / 16f * moveX);
+                        moveVector = new Vector3(moveY, moveX);
+                    }
+                    else if (arr == Arrow.DOWN)
+                    {
+                        // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 1.5인 사인그래프를 구함
+                        // 위 아래에 관해서는 진폭을 줄여서 움직임이 어색하지 않도록 함
+                        moveX = Mathf.Lerp(moveX, Constant.TILESIZE * -1f, timeLine);
+                        moveY = -1.5f * Mathf.Sin(Mathf.PI / 16f * moveX);
+                        moveVector = new Vector3(moveY, moveX);
+                    }
+                    else if (arr == Arrow.LEFT)
+                    {
+                        // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 8인 사인그래프를 구함
+                        moveX = Mathf.Lerp(moveX, Constant.TILESIZE * -1f, timeLine);
+                        moveY = -8f * Mathf.Sin(Mathf.PI / 16f * moveX);
+                        moveVector = new Vector3(moveX, moveY);
+                    }
+                    else if (arr == Arrow.RIGHT)
+                    {
+                        // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 8인 사인그래프를 구함
+                        moveX = Mathf.Lerp(moveX, Constant.TILESIZE, timeLine);
+                        moveY = 8f * Mathf.Sin(Mathf.PI / 16f * moveX);
+                        moveVector = new Vector3(moveX, moveY);
+                    }
 
-                    isMoving = false;
+                    // 플레이어를 계산한 수치만큼 기준점에서 이동시킴
+                    UpdatePosition(moveVector, false);
+                    // 목표지점에 얼추 가까워지면 도착으로 간주, 이후 상황을 결정함
+                    if ((float)Constant.TILESIZE - Mathf.Abs(moveX) < 0.05f)
+                    {
+                        // 목표 지점에 플레이어 위치를 이동시킴
+                        UpdatePosition(end, true);
 
-                    break;
+                        isMoving = false;
+
+                        break;
+                    }
+
+                    yield return oneFrame;
                 }
-
-                yield return oneFrame;
-            }
 
         }
 
@@ -195,11 +218,30 @@ public class PlayerMove : MonoBehaviour
 
     private void InitValue()
     {
+        // 시작지점을 정해줌
         startPos = playerTrans.position;
+        // 이동해야 하는 것을 플레이어 오브젝트로 초기화
+        isMoveMap = false;
 
         timeGage = 0.4f;
         timeLapse = 0f;
         timeLine = 0f;
+    }
+
+    private void UpdatePosition(Vector3 move, bool isUpdate)
+    {
+        // 플레이어 오브젝트를 이동시켜야 할 때
+        if (!isMoveMap)
+        {
+            // 플레이어의 위치를 갱신한다.
+            playerTrans.position = startPos + move;
+        }
+        // 맵 오브젝트를 이동시켜야 할 때
+        else
+        {
+            // 맵의 위치를 갱신한다.
+            mapM.UpdateMapPosition(move, isUpdate);
+        }    
     }
 
     public void OnTriggerEnter2D(Collider2D collision)
@@ -210,6 +252,8 @@ public class PlayerMove : MonoBehaviour
         {
             nowCoordX = collision.GetComponent<CheckCoordinate>().coordX;
 
+            if (nowCoordX != -1) { currentCoordX = nowCoordX; }
+
             if (nowCoordX == 9) { isMoveRight = false; }
             else if (nowCoordX == 0) { isMoveLeft = false; }
             else { isMoveRight = true; isMoveLeft = true; }
@@ -218,6 +262,8 @@ public class PlayerMove : MonoBehaviour
         if (collision.tag.Equals("COORDY"))
         {
             nowCoordY = collision.GetComponent<CheckCoordinate>().coordY;
+
+            if (nowCoordY != -1) { currentCoordY = nowCoordY; }
 
             if (nowCoordY == 9) { isMoveUp = false; }
             else if (nowCoordY == 0) { isMoveDown = false; }
