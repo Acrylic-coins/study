@@ -17,7 +17,7 @@ public class TilePrefabOrder : ResourceOrder
         resourceOrder.Add(new Constant.OrderForm() 
         {
             orderType = Constant.OrderType.SELECT,
-            orderCnt = 250,
+            orderCnt = 350,
             resourceType = Constant.ResourceType.GAMEOBJECT,
             resourceParent = this.transform,
             resourceCode = 0,

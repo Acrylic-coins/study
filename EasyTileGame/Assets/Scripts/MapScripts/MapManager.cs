@@ -20,8 +20,9 @@ public class MapManager : MonoBehaviour
     private Transform mapTrans; // 해당 오브젝트의 트랜스폼
 
     private WaitForSeconds term = new WaitForSeconds(0.05f);
-    private Coroutine firstCo;
+    private Coroutine firstCo;  // 시작 시, 초기 타일맵 생성을 담당하는 코루틴
     private Coroutine playerCo;
+    private Coroutine lateCo;   // 플레이 도중 타일 갱신을 담당하는 코루틴
 
     private Dictionary<string, Sprite> tileSprDic = new Dictionary<string, Sprite>();
     private List<Type> tileEleList = new List<Type>();
@@ -117,10 +118,46 @@ public class MapManager : MonoBehaviour
 
         yield return null;
     }
+    // 플레이어가 이동함에 따라 새로이 타일을 갱신하는 코루틴
+    IEnumerator SettingLateTiles()
+    {
+        // 한 행을 구성하는 타일의 개수
+        int indX = Constant.TILEXCOUNT;
+
+        for (int i = 0; i < indX; i++)
+        {
+            // 여분의 타일이 준비되어 있을 경우에 발동
+            if (tileParentFalseTrans.childCount > 0)
+            {
+                // 여분의 타일을 가져옴
+                GameObject ob = tileParentFalseTrans.GetChild(0).gameObject;
+                // 타일 활성화
+                ob.SetActive(true);
+                // 타일의 위치를 잡아줌
+                ob.transform.position = new Vector3(i * Constant.TILESIZE - 72f, (15f - 1f) * Constant.TILESIZE - 72f, 0f);
+                // 타일의 부모 오브젝트를 설정해줌
+                ob.transform.parent = tileParentTrans;
+                // 타일에 필요한 컴포넌트와 이미지를 부착함
+                SettingPrefab(ob);
+            }
+        }
+
+        yield return term;
+
+        StopCoroutine(lateCo);
+
+        yield return null;
+    }
 
     // 생성한 타일에 알맞는 컴포넌트를 부착함. 컴포넌트에는 타일에 대한 속성과 그에 따른 규칙이 담김
     private void SettingPrefab(GameObject obj)
     {
+        if (obj.GetComponent<TileAttribute>() != null)
+        {
+            obj.GetComponent<TileAttribute>().InitSprite();
+            return;
+        }
+
         obj.AddComponent(tileEleList[Random.Range(0, tileEleList.Count)]);
 
         string oS = obj.GetComponent<TileAttribute>().strObj;
@@ -162,23 +199,28 @@ public class MapManager : MonoBehaviour
         yield return null;
     }
 
+    // 맵을 구성하는 오브젝트들을 이동시켜 플레이어가 나아가는 듯한 연출을 주기 위한 함수
     public void UpdateMapPosition(Vector3 move, bool isUpdate)
     {
+        // 아래로 내리기만 하면 되므로, y값만 사용함
         mapTrans.position = startPos - new Vector3(0f, move.y);
-
+        // 오브젝트의 position이 끝 없이 내려가는 것을 방지하기 위해, position 재설정
         if (isUpdate)
         {
+            // 자식 오브젝트가 따라서 움직이지 않도록 다른 오브젝트 자식으로 임시 보관
             while (mapTrans.childCount > 0)
             {
                 mapTrans.GetChild(0).parent = temObj.transform;
             }
-
+            // y값이 내려간 오브젝트의 position 재설정
             mapTrans.position = Vector3.zero;
-
+            // 임시 보관 오브젝트에서 다시 자식들을 복귀시킴
             while (temObj.transform.childCount > 0)
             {
                 temObj.transform.GetChild(0).parent = mapTrans;
             }
+
+            lateCo = StartCoroutine(SettingLateTiles());
         }
     }
 }

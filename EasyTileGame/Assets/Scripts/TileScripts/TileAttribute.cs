@@ -48,6 +48,11 @@ abstract public class TileAttribute : MonoBehaviour
 		startEffectCo = StartCoroutine(EffectCo());
 	}
 
+	public void InitSprite()
+	{
+		startEffectCo = StartCoroutine(EffectCo());
+	}
+
 	IEnumerator EffectCo()
 	{
 		float bloomPlus = 0.2f;
