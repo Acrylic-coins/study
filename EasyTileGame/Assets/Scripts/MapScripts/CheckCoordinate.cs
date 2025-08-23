@@ -5,12 +5,6 @@ public class CheckCoordinate : MonoBehaviour
     public int coordX { get; private set; }
     public int coordY { get; private set; }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
     public void SettingCoord(int x, int y)
     {
         float vecX = -100;
@@ -18,7 +12,7 @@ public class CheckCoordinate : MonoBehaviour
 
         coordX = x;
         coordY = y;
-        Debug.Log(this.gameObject.name + " " + coordX + " " + coordY);
+
         if (coordX == -1)
         {
             vecX = -100;
@@ -43,5 +37,20 @@ public class CheckCoordinate : MonoBehaviour
 
         this.transform.localPosition = new Vector3(vecX, vecY);
 
+    }
+
+    public void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.tag.Equals("TILE"))
+        {
+            if (coordX == -1)
+            {
+                collision.GetComponent<TileColiderCheck>().tileCoordY = coordY;
+            }
+            else if (coordY == -1)
+            {
+                collision.GetComponent<TileColiderCheck>().tileCoordX = coordX;
+            }
+        }
     }
 }
