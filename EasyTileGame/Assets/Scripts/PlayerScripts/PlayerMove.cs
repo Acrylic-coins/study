@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.Intrinsics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
@@ -8,11 +9,16 @@ using UnityEngine.InputSystem.Controls;
 // 플레이어의 이동을 다루는 스크립트
 public class PlayerMove : MonoBehaviour
 {
-    private enum Arrow { NONE, UP, DOWN, LEFT, RIGHT };  // 어느 방향키가 눌렸는지 확인하기 위한 열거형
+    private enum State { NONE, UP, DOWN, LEFT, RIGHT, ICE1 };  // 어느 방향키가 눌렸는지 확인하기 위한 열거형
 
     [SerializeField] GameObject mapManager;
+    [SerializeField] Sprite moveSpr;
+    [SerializeField] Sprite skillSpr;
+    [SerializeField] Texture2D moveTex;
+    [SerializeField] Texture2D skillTex;
 
     private Transform playerTrans;  // 플레이어 오브젝트의 트랜스폼
+    private SpriteRenderer ren;
 
     private Player playerScr;
     private MapManager mapM; // 맵 오브젝트의 MapManager클래스
@@ -20,9 +26,10 @@ public class PlayerMove : MonoBehaviour
     private WaitForFixedUpdate oneFrame = new WaitForFixedUpdate();
 
     // 움직여야할 방향을 저장해둔 리스트. 최대 1개까지 가능하다.
-    private List<Arrow> arrowList = new List<Arrow>();
+    private List<State> stateList = new List<State>();
 
     private Coroutine moveCo;
+    private Coroutine skillCo;
 
     private Animator playerSprAnime;
 
@@ -32,6 +39,7 @@ public class PlayerMove : MonoBehaviour
     private float timeLapse; // 경과된 시간
     private float timeGage; // 한번 이동하는데 걸리는 시간
     private float timeLine; // 현재 이동시간 진행비율
+    private float skillGage;
 
     public int nowCoordX { get; private set; }  // 현재 타일 X좌표 위치
     public int nowCoordY { get; private set; }  // 현재 타일 Y좌표 위치
@@ -45,6 +53,7 @@ public class PlayerMove : MonoBehaviour
     private bool isPenetrate = false;   // 이동 시, 지나간 타일을 전부 밟은 것으로 간주할지 여부
     private bool isReadyMove = false;   // 이동 가능한 상황인지를 나타냄
     private bool isMoving = false; // 현재 한 방향으로 이동중임을 나타냄
+    private bool isSkill = false;
 
     private bool isMoveUp = true;   // 위쪽으로 이동가능한지 여부를 나타냄
     private bool isMoveDown = true; // 아래쪽으로 이동가능한지 여부를 나타냄
@@ -59,6 +68,7 @@ public class PlayerMove : MonoBehaviour
     {
         // 초기화
         mapM = mapManager.GetComponent<MapManager>();
+        ren = this.gameObject.GetComponent<SpriteRenderer>();
 
         playerSprAnime = this.GetComponent<Animator>(); // 플레이어의 애니메이터 컴포넌트 캐싱
 
@@ -76,9 +86,12 @@ public class PlayerMove : MonoBehaviour
         timeGage = 1f;
         timeLapse = 0f;
         timeLine = 0f;
+        skillGage = 1f;
 
         endCoordX = -1; // 플레이어의 목표 타일 X좌표는 아직 정해지지 않음
         endCoordY = -1; // 플레이어의 목표 타일 Y좌표는 아직 정해지지 않음
+
+        ren.sprite = moveSpr;
     }
 
     // 이동을 할 때 호출되는 함수
@@ -88,8 +101,8 @@ public class PlayerMove : MonoBehaviour
     {
         // 키를 뗄 때는 즉시 반환
         if (value.Get<float>() == 0f) { return; }
-        // 방향을 이미 1개 저장해두었다면 즉시 반환. 추가로 선입력 불가능
-        if (arrowList.Count >= 1) { return; }
+        // 상태를 이미 1개 저장해두었다면 즉시 반환. 추가로 선입력 불가능
+        if (stateList.Count >= 1) { return; }
         // 이동 가능한 상황인지 체크
         isReadyMove = playerScr.isPlayerReady;
 
@@ -97,19 +110,19 @@ public class PlayerMove : MonoBehaviour
 
         if (Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
-            arrowList.Add(Arrow.UP);
+            stateList.Add(State.UP);
         }
         else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
         {
-            arrowList.Add(Arrow.DOWN);
+            stateList.Add(State.DOWN);
         }
         else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
-            arrowList.Add(Arrow.LEFT);
+            stateList.Add(State.LEFT);
         }
         else if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
-            arrowList.Add(Arrow.RIGHT);
+            stateList.Add(State.RIGHT);
         }
 
         // 이동중 아니면 코루틴 켜기
@@ -122,14 +135,16 @@ public class PlayerMove : MonoBehaviour
     IEnumerator MoveCo()
     {
         // 움직일 방향이 없으면 코루틴 종료
-        if (arrowList.Count <= 0) { yield return oneFrame; StopCoroutine(moveCo); }
+        if (stateList.Count <= 0) { yield return oneFrame; StopCoroutine(moveCo); }
 
-        while (arrowList.Count > 0)
+        while (stateList.Count > 0)
         {
-            if (!isMoveUp && arrowList[0] == Arrow.UP) { yield return oneFrame; arrowList.RemoveAt(0); break; }
-            if (!isMoveDown && arrowList[0] == Arrow.DOWN) { yield return oneFrame; arrowList.RemoveAt(0); break; }
-            if (!isMoveLeft && arrowList[0] == Arrow.LEFT) { yield return oneFrame; arrowList.RemoveAt(0); break; }
-            if (!isMoveRight && arrowList[0] == Arrow.RIGHT) { yield return oneFrame; arrowList.RemoveAt(0); break; }
+            if ((int)stateList[0] > 4) { yield return oneFrame; continue; }
+
+            if (!isMoveUp && stateList[0] == State.UP) { yield return oneFrame; stateList.RemoveAt(0); break; }
+            if (!isMoveDown && stateList[0] == State.DOWN) { yield return oneFrame; stateList.RemoveAt(0); break; }
+            if (!isMoveLeft && stateList[0] == State.LEFT) { yield return oneFrame; stateList.RemoveAt(0); break; }
+            if (!isMoveRight && stateList[0] == State.RIGHT) { yield return oneFrame; stateList.RemoveAt(0); break; }
 
             // 여기까지 진입한 시점부터 이동중인 것으로 된다.
             isMoving = true;
@@ -137,23 +152,26 @@ public class PlayerMove : MonoBehaviour
             isPenetrate = false;
             InitValue();
 
-            Arrow arr = arrowList[0];
+            State arr = stateList[0];
 
             Vector3 end = Vector3.zero;
 
             float moveX = 0f;
             float moveY = 0f;
 
-            if (arr == Arrow.UP) { end = new Vector3(0f, 16f, 0f); playerSprAnime.SetTrigger("IsFront"); endCoordX = nowCoordX; endCoordY = nowCoordY + 1; }
-            else if (arr == Arrow.DOWN) { end = new Vector3(0f, -16f, 0f); playerSprAnime.SetTrigger("IsBack"); endCoordX = nowCoordX; endCoordY = nowCoordY - 1; }
-            else if (arr == Arrow.LEFT) { end = new Vector3(-16f, 0f, 0f); playerSprAnime.SetTrigger("IsLeft"); endCoordX = nowCoordX - 1; endCoordY = nowCoordY; }
-            else if (arr == Arrow.RIGHT) { end = new Vector3(16f, 0f, 0f); playerSprAnime.SetTrigger("IsRight"); endCoordX = nowCoordX + 1; endCoordY = nowCoordY; }
+            if (arr == State.UP) { end = new Vector3(0f, 16f, 0f); playerSprAnime.SetTrigger("IsFront"); endCoordX = nowCoordX; endCoordY = nowCoordY + 1; }
+            else if (arr == State.DOWN) { end = new Vector3(0f, -16f, 0f); playerSprAnime.SetTrigger("IsBack"); endCoordX = nowCoordX; endCoordY = nowCoordY - 1; }
+            else if (arr == State.LEFT) { end = new Vector3(-16f, 0f, 0f); playerSprAnime.SetTrigger("IsLeft"); endCoordX = nowCoordX - 1; endCoordY = nowCoordY; }
+            else if (arr == State.RIGHT) { end = new Vector3(16f, 0f, 0f); playerSprAnime.SetTrigger("IsRight"); endCoordX = nowCoordX + 1; endCoordY = nowCoordY; }
+            ren.sprite = moveSpr;
+            ren.material.SetTexture("_MainTex", moveTex);
+            ren.material.SetFloat("_MultiSpriteCnt", 21f);
 
             // 현재 이동중인 방향을 리스트에서 지워줌. 자리 비워줘야 선입력(1번까지만)할수있음
-            arrowList.RemoveAt(0);
+            stateList.RemoveAt(0);
             // 현재 이동해야 하는 것이 무엇인지 결정함
             // 플레이어가 특정 좌표보다 위쪽에 있다면 플레이어 대신 맵을 이동시킴
-            if (currentCoordY >= 4 && arr == Arrow.UP) { isMoveMap = true; }
+            if (currentCoordY >= 4 && arr == State.UP) { isMoveMap = true; }
             else { isMoveMap = false; }
 
             // 매 프레임마다 이동거리 계산을 하고 플레이어의 좌표를 바꿔줌
@@ -166,7 +184,7 @@ public class PlayerMove : MonoBehaviour
                 // 시간에 따른 이동 상황이 몇%가 되어야 하는지 계산함
                 timeLine = timeLapse / timeGage;
 
-                if (arr == Arrow.UP)
+                if (arr == State.UP)
                 {
                     // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 1.5인 사인그래프를 구함
                     // 위 아래에 관해서는 진폭을 줄여서 움직임이 어색하지 않도록 함
@@ -174,7 +192,7 @@ public class PlayerMove : MonoBehaviour
                     moveY = 1.5f * Mathf.Sin(Mathf.PI / 16f * moveX);
                     moveVector = new Vector3(moveY, moveX);
                 }
-                else if (arr == Arrow.DOWN)
+                else if (arr == State.DOWN)
                 {
                     // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 1.5인 사인그래프를 구함
                     // 위 아래에 관해서는 진폭을 줄여서 움직임이 어색하지 않도록 함
@@ -182,14 +200,14 @@ public class PlayerMove : MonoBehaviour
                     moveY = -1.5f * Mathf.Sin(Mathf.PI / 16f * moveX);
                     moveVector = new Vector3(moveY, moveX);
                 }
-                else if (arr == Arrow.LEFT)
+                else if (arr == State.LEFT)
                 {
                     // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 8인 사인그래프를 구함
                     moveX = Mathf.Lerp(moveX, Constant.TILESIZE * -1f, timeLine);
                     moveY = -8f * Mathf.Sin(Mathf.PI / 16f * moveX);
                     moveVector = new Vector3(moveX, moveY);
                 }
-                else if (arr == Arrow.RIGHT)
+                else if (arr == State.RIGHT)
                 {
                     // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 8인 사인그래프를 구함
                     moveX = Mathf.Lerp(moveX, Constant.TILESIZE, timeLine);
@@ -225,9 +243,112 @@ public class PlayerMove : MonoBehaviour
     {
         // 키를 뗄 때는 즉시 반환
         if (value.Get<float>() == 0f) { return; }
+        // 상태를 이미 1개 저장해두었다면 즉시 반환. 추가로 선입력 불가능
+        if (stateList.Count >= 1) { return; }
         // 이동가능한 상황 아니면 반환
         if (!isReadyMove) { return; }
+
+        // z키를 누를 때 발동함
+        if (Keyboard.current.zKey.wasPressedThisFrame)
+        {
+            stateList.Add(State.ICE1);
+        }
+
+        // 이동중 아니면 코루틴 켜기
+        if (!isSkill)
+        {
+            skillCo = StartCoroutine(SkillCo());
+        }
     }
+
+    IEnumerator SkillCo()
+    {
+        // 상태가 없으면 코루틴 종료
+        if (stateList.Count <= 0) { yield return oneFrame; StopCoroutine(skillCo); }
+
+        while (stateList.Count > 0)
+        {
+            if ((int)stateList[0] < 5) { yield return oneFrame; continue; }
+
+            if (!isMoveLeft && stateList[0] == State.ICE1) { yield return oneFrame; stateList.RemoveAt(0); break; }
+
+            // 여기까지 진입한 시점부터 스킬 사용중인 것으로 된다.
+            isSkill = true;
+            // 목표 타일 외에 다른 타일을 건드려도 밟은것으로 간주하지 않음
+            isPenetrate = false;
+            InitValue();
+
+            State ski = stateList[0];
+
+            Vector3 end = Vector3.zero;
+
+            float moveX = 0f;
+            float moveY = 0f;
+
+            if (ski == State.ICE1)
+            {
+                end = new Vector3(-16f, 0f, 0f); playerSprAnime.SetTrigger("IsICE1");
+                //ren.sprite = skillSpr;
+                ren.material.SetTexture("_MainTex", skillTex);
+                ren.material.SetFloat("_MultiSpriteCnt", 4f);
+
+
+
+                endCoordX = nowCoordX - 1;
+                endCoordY = nowCoordY;
+            }
+
+            // 현재 스킬을 리스트에서 지워줌. 자리 비워줘야 선입력(1번까지만)할수있음
+            stateList.RemoveAt(0);
+
+            if (currentCoordY >= 4 && ski == State.UP) { isMoveMap = true; }
+            else { isMoveMap = false; }
+
+            while(true)
+            {
+                // 현재 이동한 시간을 계산함                
+                timeLapse += Time.deltaTime;
+                // 만약 경과한 시간이 0초라면 시간이 지날 때까지 while문으로 돌아감
+                if (timeLapse == 0) { continue; }
+                // 시간에 따른 이동 상황이 몇%가 되어야 하는지 계산함
+                timeLine = timeLapse / skillGage;
+
+                if (ski == State.ICE1)
+                {
+                    moveX = Mathf.Lerp(moveX, Constant.TILESIZE * -1f, timeLine);
+
+                    moveVector = new Vector3(moveX, moveY);
+                }
+
+                // 플레이어를 계산한 수치만큼 기준점에서 이동시킴
+                UpdatePosition(moveVector, false);
+
+                if ((float)Constant.TILESIZE - Mathf.Abs(moveX) < 0.05f)
+                {
+                    // 목표 지점에 플레이어 위치를 이동시킴
+                    UpdatePosition(end, true);
+
+                    isSkill = false;
+                    ren.sprite = moveSpr;
+                    playerSprAnime.SetTrigger("IsEnd");
+                    ren.material.SetTexture("_MainTex", moveTex);
+                    break;
+                }
+
+                yield return oneFrame;
+            }
+
+            yield return oneFrame;
+        }
+
+        ren.material.SetFloat("_MultiSpriteCnt", 21f);
+
+        //yield return oneFrame;
+        StopCoroutine(skillCo);
+
+        yield return null;
+    }
+
     private void InitValue()
     {
         // 시작지점을 정해줌
@@ -238,6 +359,7 @@ public class PlayerMove : MonoBehaviour
         timeGage = 0.4f;
         timeLapse = 0f;
         timeLine = 0f;
+        skillGage = 0.3f;
     }
 
     private void UpdatePosition(Vector3 move, bool isUpdate)
