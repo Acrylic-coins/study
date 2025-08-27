@@ -30,6 +30,9 @@ public class PlayerMove : MonoBehaviour
 
     private Coroutine moveCo;
     private Coroutine skillCo;
+    private Coroutine stateListCo;  // 상태를 처리하는 코루틴
+    private Coroutine moveStateCo;  // 이동 상태를 실행하는 코루틴
+    private Coroutine skillStateCo; // 스킬 상태를 실행하는 코루틴
 
     private Animator playerSprAnime;
 
@@ -54,6 +57,9 @@ public class PlayerMove : MonoBehaviour
     private bool isReadyMove = false;   // 이동 가능한 상황인지를 나타냄
     private bool isMoving = false; // 현재 한 방향으로 이동중임을 나타냄
     private bool isSkill = false;
+    private bool isStateProcess = false;    // stateList에 담긴 명령을 처리중인지를 나타냄
+    private bool isMoveCoroutine = false;   // 이동 상태를 실행중인지 나타냄
+    private bool isSkillCoroutine = false;  // 스킬 상태를 실행중인지 나타냄
 
     private bool isMoveUp = true;   // 위쪽으로 이동가능한지 여부를 나타냄
     private bool isMoveDown = true; // 아래쪽으로 이동가능한지 여부를 나타냄
@@ -102,6 +108,47 @@ public class PlayerMove : MonoBehaviour
         // 키를 뗄 때는 즉시 반환
         if (value.Get<float>() == 0f) { return; }
         // 상태를 이미 1개 저장해두었다면 즉시 반환. 추가로 선입력 불가능
+        if (stateList.Count >= 2) { return; }
+
+
+        // 최근에 누른(뗀X) 버튼이 아래 방향키 일 때 
+        if (Keyboard.current.downArrowKey.wasPressedThisFrame)
+        {
+            // 상태 리스트에 '아래 상태'를 추가
+            stateList.Add(State.DOWN);
+        }
+        // 최근에 누른(뗀X) 버튼이 위 방향키 일 때
+        else if (Keyboard.current.upArrowKey.wasPressedThisFrame)
+        {
+            // 상태 리스트에 '위 상태'를 추가
+            stateList.Add(State.UP);
+        }
+        // 최근에 누른(뗀X) 버튼이 오른쪽 방향키 일 때
+        else if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
+        {
+            // 상태 리스트에 '오른쪽 상태'를 추가
+            stateList.Add(State.RIGHT);
+        }
+        // 최근에 누른(뗀X) 버튼이 왼쪽 방향키 일 때
+        else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
+        {
+            // 상태 리스트에 '왼쪽 상태'를 추가
+            stateList.Add(State.LEFT);
+        }
+
+
+        // 상태 처리 코루틴이 이미 발동중이면 코루틴을 실행하지 않는다.
+        if (!isStateProcess)
+        {
+            // 상태 처리 코루틴을 발동시킨다.
+            stateListCo = StartCoroutine(StateProcess());
+        }
+
+
+        return;
+        // 키를 뗄 때는 즉시 반환
+        if (value.Get<float>() == 0f) { return; }
+        // 상태를 이미 1개 저장해두었다면 즉시 반환. 추가로 선입력 불가능
         if (stateList.Count >= 1) { return; }
         // 이동 가능한 상황인지 체크
         isReadyMove = playerScr.isPlayerReady;
@@ -131,7 +178,7 @@ public class PlayerMove : MonoBehaviour
             moveCo = StartCoroutine(MoveCo());
         }
     }
-
+    // 이동을 위한 코루틴
     IEnumerator MoveCo()
     {
         // 움직일 방향이 없으면 코루틴 종료
@@ -244,6 +291,28 @@ public class PlayerMove : MonoBehaviour
         // 키를 뗄 때는 즉시 반환
         if (value.Get<float>() == 0f) { return; }
         // 상태를 이미 1개 저장해두었다면 즉시 반환. 추가로 선입력 불가능
+        if (stateList.Count >= 2) { return; }
+        
+        // 최근에 누른(뗀X) 버튼이 Z키 일 때 
+        if (Keyboard.current.zKey.wasPressedThisFrame)
+        {
+            // 상태 리스트에 '얼음 스킬1'을 추가
+            stateList.Add(State.ICE1);
+        }
+
+
+        // 상태 처리 코루틴이 이미 발동중이면 코루틴을 실행하지 않는다.
+        if (!isStateProcess)
+        {
+            // 상태 처리 코루틴을 발동시킨다.
+            stateListCo = StartCoroutine(StateProcess());
+        }
+
+
+        return;
+        // 키를 뗄 때는 즉시 반환
+        if (value.Get<float>() == 0f) { return; }
+        // 상태를 이미 1개 저장해두었다면 즉시 반환. 추가로 선입력 불가능
         if (stateList.Count >= 1) { return; }
         // 이동가능한 상황 아니면 반환
         if (!isReadyMove) { return; }
@@ -345,6 +414,167 @@ public class PlayerMove : MonoBehaviour
 
         //yield return oneFrame;
         StopCoroutine(skillCo);
+
+        yield return null;
+    }
+
+    // stateList에 저장된 상태를 입력 순서대로 발동시킨다.
+    IEnumerator StateProcess()
+    {
+        // 해당 코루틴이 발동되고 있음을 나타냄
+        isStateProcess = true;
+
+        // 상태를 모두 발동시킬 때까지 실행한다.
+        while (stateList.Count > 0)
+        {
+            // 가장 앞에 있는 상태를 발동시킨다.
+            // 가장 앞에 있는 상태가 이동 관련 상태일 때
+            if ((int)stateList[0] < 5)
+            {
+                moveStateCo = StartCoroutine(MoveCoroutine());
+            }
+            // 가장 앞에 있는 상태가 스킬 관련 상태일 때
+            else
+            {
+                skillStateCo = StartCoroutine(SkillCoroutine());
+            }
+
+            // 어느 상태던, 코루틴(Move, Skill)이 실행되고 있다면 해당 루프를 계속 실행시킴
+            // 코루틴이 끝날 때까지 다른 상태 명령이 실행되는 걸 막기 위함
+            while (isMoveCoroutine || isSkillCoroutine)
+            {
+                Debug.Log("asdf");
+                // 1프레임 대기가 없으면 프로그램 멈춤
+                yield return oneFrame;
+            }
+
+            // 실행이 끝난 상태를 종료함
+            stateList.RemoveAt(0);
+            // 더 실행할 상태가 없다면 즉시 루프를 탈출함
+            if (stateList.Count < 1)
+            {
+                break;
+            }
+
+            yield return oneFrame;
+        }
+
+        // 시작과 동시에 반환되는 것을 방지하기 위해(안하면 nullReference 오류뜸) 1프레임 대기함
+        yield return oneFrame;
+        // 해당 코루틴이 끝났음을 나타냄
+        isStateProcess = false;
+        // 코루틴 종료
+        yield return null;
+    }
+
+    // 이동 상태를 실행시키는 코루틴
+    IEnumerator MoveCoroutine()
+    {
+        // 해당 코루틴이 실행중임을 나타냄
+        isMoveCoroutine = true;
+
+        // 위쪽으로 더 올라가지 못하나, 위쪽 방향이 입력되었다면 행동을 즉시 끝낸다.
+        if (!isMoveUp && stateList[0] == State.UP) { yield return oneFrame; yield return null; }
+        // 아래쪽으로 더 올라가지 못하나, 아래쪽 방향이 입력되었다면 행동을 즉시 끝낸다.
+        if (!isMoveDown && stateList[0] == State.DOWN) { yield return oneFrame; yield return null; }
+        // 왼쪽으로 더 올라가지 못하나, 왼쪽 방향이 입력되었다면 행동을 즉시 끝낸다.
+        if (!isMoveLeft && stateList[0] == State.LEFT) { yield return oneFrame; yield return null; }
+        // 오른쪽으로 더 올라가지 못하나, 오른쪽 방향이 입력되었다면 행동을 즉시 끝낸다.
+        if (!isMoveRight && stateList[0] == State.RIGHT) { yield return oneFrame; yield return null; }
+
+        // 목표 타일 외에 다른 타일을 건드려도 밟은것으로 간주하지 않음
+        isPenetrate = false;
+        // 필요한 변수를 초기화함
+        InitValue();
+        // 목표지점을 알기 위한 변수
+        Vector3 end = Vector3.zero;
+        // 각각 시작지점에서 매 프레임 얼만큼 x,y방향으로 이동해야 할지를 정하기 위함
+        float moveX = 0f;
+        float moveY = 0f;
+
+        // 시작지점에서 목표지점까지의 좌표 차이를 구함
+        if (stateList[0] == State.UP) { end = new Vector3(0f, 16f, 0f); playerSprAnime.SetTrigger("IsFront"); endCoordX = nowCoordX; endCoordY = nowCoordY + 1; }
+        else if (stateList[0] == State.DOWN) { end = new Vector3(0f, -16f, 0f); playerSprAnime.SetTrigger("IsBack"); endCoordX = nowCoordX; endCoordY = nowCoordY - 1; }
+        else if (stateList[0] == State.LEFT) { end = new Vector3(-16f, 0f, 0f); playerSprAnime.SetTrigger("IsLeft"); endCoordX = nowCoordX - 1; endCoordY = nowCoordY; }
+        else if (stateList[0] == State.RIGHT) { end = new Vector3(16f, 0f, 0f); playerSprAnime.SetTrigger("IsRight"); endCoordX = nowCoordX + 1; endCoordY = nowCoordY; }
+
+        // 매 프레임마다 이동거리 계산을 하고 플레이어의 좌표를 바꿔줌
+        while (true)
+        {
+            // 현재 이동한 시간을 계산함                
+            timeLapse += Time.deltaTime;
+            // 만약 경과한 시간이 0초라면 시간이 지날 때까지 while문으로 돌아감
+            if (timeLapse == 0) { continue; }
+            // 시간에 따른 이동 상황이 몇%가 되어야 하는지 계산함
+            timeLine = timeLapse / timeGage;
+
+            if (stateList[0] == State.UP)
+            {
+                // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 1.5인 사인그래프를 구함
+                // 위 아래에 관해서는 진폭을 줄여서 움직임이 어색하지 않도록 함
+                moveX = Mathf.Lerp(moveX, Constant.TILESIZE, timeLine);
+                moveY = 1.5f * Mathf.Sin(Mathf.PI / 16f * moveX);
+                moveVector = new Vector3(moveY, moveX);
+            }
+            else if (stateList[0] == State.DOWN)
+            {
+                // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 1.5인 사인그래프를 구함
+                // 위 아래에 관해서는 진폭을 줄여서 움직임이 어색하지 않도록 함
+                moveX = Mathf.Lerp(moveX, Constant.TILESIZE * -1f, timeLine);
+                moveY = -1.5f * Mathf.Sin(Mathf.PI / 16f * moveX);
+                moveVector = new Vector3(moveY, moveX);
+            }
+            else if (stateList[0] == State.LEFT)
+            {
+                // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 8인 사인그래프를 구함
+                moveX = Mathf.Lerp(moveX, Constant.TILESIZE * -1f, timeLine);
+                moveY = -8f * Mathf.Sin(Mathf.PI / 16f * moveX);
+                moveVector = new Vector3(moveX, moveY);
+            }
+            else if (stateList[0] == State.RIGHT)
+            {
+                // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 8인 사인그래프를 구함
+                moveX = Mathf.Lerp(moveX, Constant.TILESIZE, timeLine);
+                moveY = 8f * Mathf.Sin(Mathf.PI / 16f * moveX);
+                moveVector = new Vector3(moveX, moveY);
+            }
+
+            // 플레이어를 계산한 수치만큼 기준점에서 이동시킴
+            UpdatePosition(moveVector, false);
+            // 목표지점에 얼추 가까워지면 도착으로 간주, 이후 상황을 결정함
+            if ((float)Constant.TILESIZE - Mathf.Abs(moveX) < 0.05f)
+            {
+                // 목표 지점에 플레이어 위치를 이동시킴
+                UpdatePosition(end, true);
+                // 해당 코루틴이 끝났음을 나타냄
+                isMoveCoroutine = false;
+                // 해당 코루틴을 종료시킴
+                StopCoroutine(moveStateCo);
+
+                yield return null;
+
+                break;
+            }
+
+            // 1프레임 대기함
+            yield return oneFrame;
+        }
+
+        yield return null;
+    }
+
+    // 스킬 상태를 실행시키는 코루틴
+    IEnumerator SkillCoroutine()
+    {
+        // 해당 코루틴이 실행중임을 나타냄
+        isSkillCoroutine = true;
+
+        while (true)
+        {
+
+            yield return oneFrame;
+        }
+
 
         yield return null;
     }
