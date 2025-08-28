@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst.Intrinsics;
@@ -20,15 +21,17 @@ public class PlayerMove : MonoBehaviour
     private Transform playerTrans;  // 플레이어 오브젝트의 트랜스폼
     private SpriteRenderer ren;
 
-    private Player playerScr;
     private MapManager mapM; // 맵 오브젝트의 MapManager클래스
 
     private WaitForFixedUpdate oneFrame = new WaitForFixedUpdate();
 
+    // 플레이어 스킬들의 내용을 저장해둔 딕셔너리
+    private Dictionary<string, PlayerSkill> playerSkillDic = new Dictionary<string, PlayerSkill>();
+
+    private List<Dictionary<string, string>> skillList = new List<Dictionary<string, string>>(); // PlayerSkill.csv를 읽어오기 위한 리스트
     // 움직여야할 방향을 저장해둔 리스트. 최대 1개까지 가능하다.
     private List<State> stateList = new List<State>();
 
-    private Coroutine moveCo;
     private Coroutine skillCo;
     private Coroutine stateListCo;  // 상태를 처리하는 코루틴
     private Coroutine moveStateCo;  // 이동 상태를 실행하는 코루틴
@@ -52,10 +55,8 @@ public class PlayerMove : MonoBehaviour
     private int endCoordX;  // 플레이어가 목표로 하는 X좌표 위치
     private int endCoordY;  // 플레이어가 목표로 하는 Y좌표 위치
 
-
     private bool isPenetrate = false;   // 이동 시, 지나간 타일을 전부 밟은 것으로 간주할지 여부
     private bool isReadyMove = false;   // 이동 가능한 상황인지를 나타냄
-    private bool isMoving = false; // 현재 한 방향으로 이동중임을 나타냄
     private bool isSkill = false;
     private bool isStateProcess = false;    // stateList에 담긴 명령을 처리중인지를 나타냄
     private bool isMoveCoroutine = false;   // 이동 상태를 실행중인지 나타냄
@@ -68,7 +69,6 @@ public class PlayerMove : MonoBehaviour
 
     private bool isMoveMap = false; // 현재 좌표를 이동시켜야 하는 것이 플레이어인지 맵인지 여부를 나타냄
 
-
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
@@ -79,7 +79,6 @@ public class PlayerMove : MonoBehaviour
         playerSprAnime = this.GetComponent<Animator>(); // 플레이어의 애니메이터 컴포넌트 캐싱
 
         playerTrans = this.transform;   // 플레이어의 트랜스폼 캐싱
-        playerScr = this.GetComponent<Player>();    // 해당 오브젝트의 'Player' 클래스 캐싱
 
         startPos = playerTrans.position;    // 플레이어의 시작위치를 정해줌
 
@@ -98,6 +97,32 @@ public class PlayerMove : MonoBehaviour
         endCoordY = -1; // 플레이어의 목표 타일 Y좌표는 아직 정해지지 않음
 
         ren.sprite = moveSpr;
+
+        InitSkillSetting();
+    }
+
+    // 스킬을 생성하기 위한 함수
+    private void InitSkillSetting()
+    {
+        skillList = CSVReader.ReadCSV("PlayerSkill.csv");
+
+        string type = "";
+
+        // 스킬 개수만큼 차례로 정보를 불러옴
+        for (int i = 0; i < skillList.Count; i++)
+        {
+            // 스킬의 타입을 읽어옴
+            type = skillList[i]["PlayerSkillType"];
+
+            // 어떤 스킬 타입인지에 따라 가져오는 클래스가 다름
+
+            var t = TypeFinder.FindDerivedType<PlayerSkill>(type + "Skill");
+            if (t != null)
+            {
+                var cl = Activator.CreateInstance(t) as PlayerSkill;
+                
+            }
+        }
     }
 
     // 이동을 할 때 호출되는 함수
@@ -109,7 +134,6 @@ public class PlayerMove : MonoBehaviour
         if (value.Get<float>() == 0f) { return; }
         // 상태를 이미 1개 저장해두었다면 즉시 반환. 추가로 선입력 불가능
         if (stateList.Count >= 2) { return; }
-
 
         // 최근에 누른(뗀X) 버튼이 아래 방향키 일 때 
         if (Keyboard.current.downArrowKey.wasPressedThisFrame)
@@ -136,155 +160,12 @@ public class PlayerMove : MonoBehaviour
             stateList.Add(State.LEFT);
         }
 
-
         // 상태 처리 코루틴이 이미 발동중이면 코루틴을 실행하지 않는다.
         if (!isStateProcess)
         {
             // 상태 처리 코루틴을 발동시킨다.
             stateListCo = StartCoroutine(StateProcess());
         }
-
-
-        return;
-        // 키를 뗄 때는 즉시 반환
-        if (value.Get<float>() == 0f) { return; }
-        // 상태를 이미 1개 저장해두었다면 즉시 반환. 추가로 선입력 불가능
-        if (stateList.Count >= 1) { return; }
-        // 이동 가능한 상황인지 체크
-        isReadyMove = playerScr.isPlayerReady;
-
-        if (!isReadyMove) { return; }
-
-        if (Keyboard.current.upArrowKey.wasPressedThisFrame)
-        {
-            stateList.Add(State.UP);
-        }
-        else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
-        {
-            stateList.Add(State.DOWN);
-        }
-        else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
-        {
-            stateList.Add(State.LEFT);
-        }
-        else if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
-        {
-            stateList.Add(State.RIGHT);
-        }
-
-        // 이동중 아니면 코루틴 켜기
-        if (!isMoving)
-        {
-            moveCo = StartCoroutine(MoveCo());
-        }
-    }
-    // 이동을 위한 코루틴
-    IEnumerator MoveCo()
-    {
-        // 움직일 방향이 없으면 코루틴 종료
-        if (stateList.Count <= 0) { yield return oneFrame; StopCoroutine(moveCo); }
-
-        while (stateList.Count > 0)
-        {
-            if ((int)stateList[0] > 4) { yield return oneFrame; continue; }
-
-            if (!isMoveUp && stateList[0] == State.UP) { yield return oneFrame; stateList.RemoveAt(0); break; }
-            if (!isMoveDown && stateList[0] == State.DOWN) { yield return oneFrame; stateList.RemoveAt(0); break; }
-            if (!isMoveLeft && stateList[0] == State.LEFT) { yield return oneFrame; stateList.RemoveAt(0); break; }
-            if (!isMoveRight && stateList[0] == State.RIGHT) { yield return oneFrame; stateList.RemoveAt(0); break; }
-
-            // 여기까지 진입한 시점부터 이동중인 것으로 된다.
-            isMoving = true;
-            // 목표 타일 외에 다른 타일을 건드려도 밟은것으로 간주하지 않음
-            isPenetrate = false;
-            InitValue();
-
-            State arr = stateList[0];
-
-            Vector3 end = Vector3.zero;
-
-            float moveX = 0f;
-            float moveY = 0f;
-
-            if (arr == State.UP) { end = new Vector3(0f, 16f, 0f); playerSprAnime.SetTrigger("IsFront"); endCoordX = nowCoordX; endCoordY = nowCoordY + 1; }
-            else if (arr == State.DOWN) { end = new Vector3(0f, -16f, 0f); playerSprAnime.SetTrigger("IsBack"); endCoordX = nowCoordX; endCoordY = nowCoordY - 1; }
-            else if (arr == State.LEFT) { end = new Vector3(-16f, 0f, 0f); playerSprAnime.SetTrigger("IsLeft"); endCoordX = nowCoordX - 1; endCoordY = nowCoordY; }
-            else if (arr == State.RIGHT) { end = new Vector3(16f, 0f, 0f); playerSprAnime.SetTrigger("IsRight"); endCoordX = nowCoordX + 1; endCoordY = nowCoordY; }
-            ren.sprite = moveSpr;
-            ren.material.SetTexture("_MainTex", moveTex);
-            ren.material.SetFloat("_MultiSpriteCnt", 21f);
-
-            // 현재 이동중인 방향을 리스트에서 지워줌. 자리 비워줘야 선입력(1번까지만)할수있음
-            stateList.RemoveAt(0);
-            // 현재 이동해야 하는 것이 무엇인지 결정함
-            // 플레이어가 특정 좌표보다 위쪽에 있다면 플레이어 대신 맵을 이동시킴
-            if (currentCoordY >= 4 && arr == State.UP) { isMoveMap = true; }
-            else { isMoveMap = false; }
-
-            // 매 프레임마다 이동거리 계산을 하고 플레이어의 좌표를 바꿔줌
-            while (true)
-            {
-                // 현재 이동한 시간을 계산함                
-                timeLapse += Time.deltaTime;
-                // 만약 경과한 시간이 0초라면 시간이 지날 때까지 while문으로 돌아감
-                if (timeLapse == 0) { continue; }
-                // 시간에 따른 이동 상황이 몇%가 되어야 하는지 계산함
-                timeLine = timeLapse / timeGage;
-
-                if (arr == State.UP)
-                {
-                    // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 1.5인 사인그래프를 구함
-                    // 위 아래에 관해서는 진폭을 줄여서 움직임이 어색하지 않도록 함
-                    moveX = Mathf.Lerp(moveX, Constant.TILESIZE, timeLine);
-                    moveY = 1.5f * Mathf.Sin(Mathf.PI / 16f * moveX);
-                    moveVector = new Vector3(moveY, moveX);
-                }
-                else if (arr == State.DOWN)
-                {
-                    // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 1.5인 사인그래프를 구함
-                    // 위 아래에 관해서는 진폭을 줄여서 움직임이 어색하지 않도록 함
-                    moveX = Mathf.Lerp(moveX, Constant.TILESIZE * -1f, timeLine);
-                    moveY = -1.5f * Mathf.Sin(Mathf.PI / 16f * moveX);
-                    moveVector = new Vector3(moveY, moveX);
-                }
-                else if (arr == State.LEFT)
-                {
-                    // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 8인 사인그래프를 구함
-                    moveX = Mathf.Lerp(moveX, Constant.TILESIZE * -1f, timeLine);
-                    moveY = -8f * Mathf.Sin(Mathf.PI / 16f * moveX);
-                    moveVector = new Vector3(moveX, moveY);
-                }
-                else if (arr == State.RIGHT)
-                {
-                    // 주기가 32( | moveEndVector.x * 2 | 의 수치), 진폭이 8인 사인그래프를 구함
-                    moveX = Mathf.Lerp(moveX, Constant.TILESIZE, timeLine);
-                    moveY = 8f * Mathf.Sin(Mathf.PI / 16f * moveX);
-                    moveVector = new Vector3(moveX, moveY);
-                }
-
-                // 플레이어를 계산한 수치만큼 기준점에서 이동시킴
-                UpdatePosition(moveVector, false);
-                // 목표지점에 얼추 가까워지면 도착으로 간주, 이후 상황을 결정함
-                if ((float)Constant.TILESIZE - Mathf.Abs(moveX) < 0.05f)
-                {
-                    // 목표 지점에 플레이어 위치를 이동시킴
-                    UpdatePosition(end, true);
-
-                    isMoving = false;
-
-                    break;
-                }
-
-                yield return oneFrame;
-            }
-
-        }
-
-        playerSprAnime.SetTrigger("IsEnd");
-        //yield return oneFrame;
-        StopCoroutine(moveCo);
-
-        yield return null;
     }
     public void OnSKILL(InputValue value)
     {
@@ -300,14 +181,12 @@ public class PlayerMove : MonoBehaviour
             stateList.Add(State.ICE1);
         }
 
-
         // 상태 처리 코루틴이 이미 발동중이면 코루틴을 실행하지 않는다.
         if (!isStateProcess)
         {
             // 상태 처리 코루틴을 발동시킨다.
             stateListCo = StartCoroutine(StateProcess());
         }
-
 
         return;
         // 키를 뗄 때는 즉시 반환
@@ -412,7 +291,6 @@ public class PlayerMove : MonoBehaviour
 
         ren.material.SetFloat("_MultiSpriteCnt", 21f);
 
-        //yield return oneFrame;
         StopCoroutine(skillCo);
 
         yield return null;
@@ -443,7 +321,6 @@ public class PlayerMove : MonoBehaviour
             // 코루틴이 끝날 때까지 다른 상태 명령이 실행되는 걸 막기 위함
             while (isMoveCoroutine || isSkillCoroutine)
             {
-                Debug.Log("asdf");
                 // 1프레임 대기가 없으면 프로그램 멈춤
                 yield return oneFrame;
             }
@@ -639,11 +516,6 @@ public class PlayerMove : MonoBehaviour
             else if (nowCoordY == 0) { isMoveDown = false; }
             else { isMoveUp = true; isMoveDown = true; }
         }
-
-        //if (!collision.tag.Equals("COORDY") && !collision.tag.Equals("COORDX"))
-        //{
-        //    Debug.Log("nowCoordX : " + nowCoordX + " nowCoordY : " + nowCoordY);
-        //}
     }
 
     public void OnTriggerExit2D(Collider2D collision)
