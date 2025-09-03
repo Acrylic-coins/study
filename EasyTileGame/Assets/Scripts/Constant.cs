@@ -11,6 +11,11 @@ public static class Constant
 	public enum ElementType { NONE = -1, FIRE, SOIL, THUNDER, PLANT, ICE, METAL, DARK, LIGHT, NOTHING, ALL };
 	// 리소스 주문 방식을 위한 열거형. SELECT면 orderName과 일치한 주소에 가고, ALL이면 orderName을 포함한 모든 주소에 가서 가져옴
 	public enum OrderType { SELECT = 0, ALL };
+	// 스킬 방식
+	public enum SkillType { MOVE = 0, ATTACK};
+	// 이동 방식
+	// BEELINE = 직선, CURVE = 곡선
+	public enum LineType { BEELINE = 0, CURVE = 1};
 	// 리소스 자료형 종류
 	public enum ResourceType { GAMEOBJECT = 0, SPRITE };
 	public struct OrderForm

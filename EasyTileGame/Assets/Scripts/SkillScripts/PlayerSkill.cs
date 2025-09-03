@@ -3,11 +3,21 @@ using UnityEngine;
 // 플레이어 스킬 클래스
 abstract public class PlayerSkill
 {
-    public Constant.ElementType skillType { get; protected set; }  // 스킬 타입. 8종류 중 하나로 결정됨
+    public Constant.ElementType elementType { get; set; }  // 스킬 속성. 8종류 중 하나로 결정됨
+    public Constant.SkillType skillType { get; set; } // 스킬 방식. 이동, 공격 등이 있음
 
-    public string skillName { get; protected set; } // 스킬 이름. 딕셔너리 만들 때 씀 
+    public string skillName { get; set; } // 스킬 이름. 
+    public string activateKey { get; set; }    // 스킬을 사용하기 위한 키보드 키
+    public string playerSkillSpriteTrigger { get; set; }    // 스킬 스프라이트를 변경하기 위한 변수 이름
 
-    public int skillMana { get; protected set; }    // 스킬 소모 마력
+    public int skillMana { get; set; }    // 스킬 소모 마력
+
+    public bool isPenetrate { get; set; } // 스킬로 지나간 자리 전부 밟은것으로 간주하는지 여부(false이면 아님)
+
+    public PlayerSkill()
+    {
+        isPenetrate = false;
+    }
 }
 
 // 얼음 스킬
@@ -15,7 +25,7 @@ public class IceSkill : PlayerSkill
 {
     public IceSkill()
     {
-        skillType = Constant.ElementType.ICE;
+        elementType = Constant.ElementType.ICE;
     }
 }
 
@@ -24,7 +34,7 @@ public class FireSkill : PlayerSkill
 {
     public FireSkill()
     {
-        skillType = Constant.ElementType.FIRE;
+        elementType = Constant.ElementType.FIRE;
     }
 }
 
@@ -33,7 +43,7 @@ public class ThunderSkill : PlayerSkill
 {
     public ThunderSkill()
     {
-        skillType = Constant.ElementType.THUNDER;
+        elementType = Constant.ElementType.THUNDER;
     }
 }
 
@@ -42,7 +52,7 @@ public class PlantSkill : PlayerSkill
 {
     public PlantSkill()
     {
-        skillType = Constant.ElementType.PLANT;
+        elementType = Constant.ElementType.PLANT;
     }
 }
 
@@ -51,7 +61,7 @@ public class MetalSkill : PlayerSkill
 {
     public MetalSkill()
     {
-        skillType = Constant.ElementType.METAL;
+        elementType = Constant.ElementType.METAL;
     }
 }
 
@@ -60,7 +70,7 @@ public class SoilSkill : PlayerSkill
 {
     public SoilSkill()
     {
-        skillType = Constant.ElementType.SOIL;
+        elementType = Constant.ElementType.SOIL;
     }
 }
 
@@ -69,7 +79,7 @@ public class DarkSkill : PlayerSkill
 {
     public DarkSkill()
     {
-        skillType = Constant.ElementType.DARK;
+        elementType = Constant.ElementType.DARK;
     }
 }
 
@@ -78,6 +88,6 @@ public class LightSkill : PlayerSkill
 {
     public LightSkill()
     {
-        skillType = Constant.ElementType.LIGHT;
+        elementType = Constant.ElementType.LIGHT;
     }
 }

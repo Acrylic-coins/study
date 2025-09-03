@@ -20,7 +20,7 @@ public class CheckCoordinate : MonoBehaviour
         else
         {
             vecX = (x - 5) * Constant.TILESIZE + Constant.TILESIZE * 0.5f;
-            this.GetComponent<BoxCollider2D>().size = new Vector2(5f, 200f);
+            this.GetComponent<BoxCollider2D>().size = new Vector2(15.92f, 200f);
             this.GetComponent<BoxCollider2D>().offset = new Vector2(0f, -100f);
         }
 
@@ -31,7 +31,7 @@ public class CheckCoordinate : MonoBehaviour
         else
         {
             vecY = (y - 5) * Constant.TILESIZE + Constant.TILESIZE * 0.5f;
-            this.GetComponent<BoxCollider2D>().size = new Vector2(200f , 5f);
+            this.GetComponent<BoxCollider2D>().size = new Vector2(200f , 15.92f);
             this.GetComponent<BoxCollider2D>().offset = new Vector2(100f, 0f);
         }
 

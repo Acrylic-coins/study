@@ -147,9 +147,6 @@ public class Player : MonoBehaviour
         isPlayerReady = true;
 
         StopCoroutine(appearEffectCo);
-
-
-        yield return null;
     }
 
     IEnumerator ResizeColider()
@@ -174,6 +171,6 @@ public class Player : MonoBehaviour
             }
         }
 
-        yield return null;
+        StopCoroutine(resizeColliderCo);
     }
 }

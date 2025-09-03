@@ -104,8 +104,6 @@ public class TileColiderCheck : MonoBehaviour
         oneLightCoCnt += 1.5f;
 
         StopCoroutine(oneLightCo);
-
-        yield return null;
     }
     // 플레이어 등장 이후, 밟은 타일을 번쩍이게 하기 위한 코루틴
     IEnumerator RepeatLight()
@@ -200,8 +198,6 @@ public class TileColiderCheck : MonoBehaviour
         isRepeatCo = false;
 
         StopCoroutine(repeatLightCo);
-
-        yield return null;
     }
 
 }
