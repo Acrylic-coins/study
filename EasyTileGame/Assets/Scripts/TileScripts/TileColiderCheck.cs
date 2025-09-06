@@ -65,6 +65,18 @@ public class TileColiderCheck : MonoBehaviour
                     if (lightCnt > 0 && !isRepeatCo)
                     {
                         repeatLightCo = StartCoroutine(RepeatLight());
+
+                    }
+                    // 조건에 따라 플레이어의 마력을 채움
+                    // 타일의 충전횟수가 남아있고 TileAttribute 컴포넌트가 타일에 붙어있어야됨
+                    if (lightCnt > 0 && this.GetComponent<TileAttribute>() != null) 
+                    {
+                        // 회복시켜야 하는 수치
+                        int charge = 2;
+
+                        if (lightCnt < 4) { charge = 1; }
+
+                        collision.GetComponent<PlayerMove>().UpdatePlayerMana(this.GetComponent<TileAttribute>().type, charge);
                     }
                 }
             }
@@ -199,5 +211,4 @@ public class TileColiderCheck : MonoBehaviour
 
         StopCoroutine(repeatLightCo);
     }
-
 }

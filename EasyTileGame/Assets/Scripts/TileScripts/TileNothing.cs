@@ -5,5 +5,6 @@ public class TileNothing : TileAttribute
 	private void Awake()
 	{
 		strEle = "Nothing";
+		type = Constant.ElementType.NOTHING;
 	}
 }

@@ -31,6 +31,7 @@ public class PlayerMove : MonoBehaviour
 
     // 플레이어 스킬들의 내용을 저장해둔 딕셔너리
     private Dictionary<string, PlayerSkill> playerSkillDic = new Dictionary<string, PlayerSkill>();
+    private Dictionary<Constant.ElementType, int> playerManaDic = new Dictionary<Constant.ElementType, int>();  // 플레이어의 마력을 기록한 딕셔너리
 
     private List<Dictionary<string, string>> skillList = new List<Dictionary<string, string>>(); // PlayerSkill.csv를 읽어오기 위한 리스트
     private List<Dictionary<string, string>> skillMoveList = new List<Dictionary<string, string>>();    // PlayerSkillMove.csv를 읽어오기 위한 리스트
@@ -107,6 +108,12 @@ public class PlayerMove : MonoBehaviour
         ren.sprite = moveSpr;
 
         InitSkillSetting();
+
+        // 플레이어의 마력 초기화
+        for (int i = 1; i < 8; i++)
+        {
+            playerManaDic.Add((Constant.ElementType)i, 100);
+        }
 
         checkCoordCo = StartCoroutine(CheckPlayerCoord());
     }
@@ -677,7 +684,7 @@ public class PlayerMove : MonoBehaviour
             colResultList.Clear();
         }
     }
-
+    
     IEnumerator CheckPlayerCoord()
     {
         while (true)
@@ -709,5 +716,38 @@ public class PlayerMove : MonoBehaviour
 
             yield return null;
         }
+    }
+    // 플레이어의 마력 수치를 갱신시킴
+    public int UpdatePlayerMana(Constant.ElementType type, int manaAmount)
+    {
+        // 해당 속성이 없거나 전(全)속성이 아니면 반환
+        if (!playerManaDic.ContainsKey(type) && type != Constant.ElementType.ALL) { return -1; }
+
+        Constant.ElementType t = Constant.ElementType.NONE;
+
+        // 전속성 타일을 밟았다면 랜덤한 마력속성을 결정
+        if (type == Constant.ElementType.ALL) 
+        {
+            t = playerManaDic.ElementAt(UnityEngine.Random.Range(0, playerManaDic.Count)).Key;
+        }
+        // 그렇지 않다면 타일에 맞는 마력속성 찾음
+        else
+        {
+            t = type;
+        }
+
+        // 해당 속성의 마력 수치가 999를 넘어가면 999로 고정
+        if (playerManaDic[t] + manaAmount > 999)
+        {
+            playerManaDic[t] = 999;
+        }
+        // 그렇지 않다면 수치만큼 더해줌
+        else
+        {
+            playerManaDic[t] += manaAmount;
+        }
+
+        // 더해진 수치를 반환함
+        return playerManaDic[t];
     }
 }

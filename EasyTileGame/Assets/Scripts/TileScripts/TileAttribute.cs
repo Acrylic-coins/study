@@ -10,13 +10,14 @@ abstract public class TileAttribute : MonoBehaviour
 	private WaitForSeconds se = new WaitForSeconds(0.01f);
 	private WaitForSeconds se2 = new WaitForSeconds(0.014f);
 
-	protected SpriteRenderer sprRen;
+    protected SpriteRenderer sprRen;
 	protected SpriteRenderer sprOnRen;
 
 	protected Sprite deSpr;	// 밟지 않았을 때 스프라이트
 	protected Sprite liSpr; // 밟아서 빛날 때 스프라이트
 
-	public string strObj { get { return "MainTile"; } private set { } }
+    public Constant.ElementType type { get; protected set; }
+    public string strObj { get { return "MainTile"; } private set { } }
 	public string strEle { get; protected set; }
 	public bool isEffect = false;
 

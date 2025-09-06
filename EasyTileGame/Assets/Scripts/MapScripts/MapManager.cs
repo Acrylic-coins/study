@@ -13,6 +13,7 @@ public class MapManager : MonoBehaviour
     [SerializeField] private GameObject playerObj;  // 맵 생성 후 플레이어를 부르기 위함
     [SerializeField] private GameObject coordObj;   // 좌표를 탐지하는 게임오브젝트
     [SerializeField] private GameObject temObj; // 임시로 자식들을 보관하는 게임오브젝트
+    [SerializeField] private GameObject InGameUIObj;  // 플레이어의 마력 수치를 보여주는 게임오브젝트
 
     private Transform tileParentTrans;  // tileParent의 transform
     private Transform tileParentFalseTrans; // tileParentFalse의 transform
@@ -91,6 +92,9 @@ public class MapManager : MonoBehaviour
             }
 			yield return term;
 		}
+
+        // 마력 UI를 킴
+        InGameUIObj.SetActive(true);
 
         // 화면 밖에 여분의 타일을 생성
         for (int i = 0; i < 10; i++)
