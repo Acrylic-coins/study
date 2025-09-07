@@ -16,6 +16,7 @@ public class PlayerMove : MonoBehaviour
     private enum State { NONE, UP, DOWN, LEFT, RIGHT, SKILL };  // 어느 방향키가 눌렸는지 확인하기 위한 열거형
 
     [SerializeField] GameObject mapManager;
+    [SerializeField] ManaUIScripts manaUIScr;
     [SerializeField] Sprite moveSpr;
     [SerializeField] Sprite skillSpr;
     [SerializeField] Texture2D moveTex;
@@ -110,7 +111,7 @@ public class PlayerMove : MonoBehaviour
         InitSkillSetting();
 
         // 플레이어의 마력 초기화
-        for (int i = 1; i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
             playerManaDic.Add((Constant.ElementType)i, 100);
         }
@@ -718,10 +719,10 @@ public class PlayerMove : MonoBehaviour
         }
     }
     // 플레이어의 마력 수치를 갱신시킴
-    public int UpdatePlayerMana(Constant.ElementType type, int manaAmount)
+    public void UpdatePlayerMana(Constant.ElementType type, int manaAmount)
     {
         // 해당 속성이 없거나 전(全)속성이 아니면 반환
-        if (!playerManaDic.ContainsKey(type) && type != Constant.ElementType.ALL) { return -1; }
+        if (!playerManaDic.ContainsKey(type) && type != Constant.ElementType.ALL) { return; }
 
         Constant.ElementType t = Constant.ElementType.NONE;
 
@@ -734,6 +735,7 @@ public class PlayerMove : MonoBehaviour
         else
         {
             t = type;
+            Debug.Log(t);
         }
 
         // 해당 속성의 마력 수치가 999를 넘어가면 999로 고정
@@ -747,7 +749,7 @@ public class PlayerMove : MonoBehaviour
             playerManaDic[t] += manaAmount;
         }
 
-        // 더해진 수치를 반환함
-        return playerManaDic[t];
+        // ManaUI에 수치를 전달함
+        manaUIScr.UpdateManaAmountText(t, playerManaDic[t]);
     }
 }

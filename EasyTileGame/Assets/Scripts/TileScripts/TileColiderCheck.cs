@@ -16,6 +16,8 @@ public class TileColiderCheck : MonoBehaviour
     private Coroutine oneLightCo;   // 플레이어 등장 시 연출을 조성하기 위한 코루틴
     private Coroutine repeatLightCo;    // 플레이어 이동으로 타일을 밟을 때 번쩍임을 연출하는 코루틴
 
+    private Collider2D objCol2D;
+
     private GameObject player;  // 플레이어 게임 오브젝트
 
     private float oneLightCoCnt = 0f;   // 연출 상에서 타일의 번쩍임 세기를 조절하기 위한 변수
@@ -28,6 +30,7 @@ public class TileColiderCheck : MonoBehaviour
     private bool isLight = false;
     private bool isRepeatCo = false;
     private bool isCheck = false;
+    private bool isManaUpdate = false;  // 플레이어의 마력을 갱신해야 하는 상황일 때
 
     private void Awake()
     {
@@ -65,18 +68,11 @@ public class TileColiderCheck : MonoBehaviour
                     if (lightCnt > 0 && !isRepeatCo)
                     {
                         repeatLightCo = StartCoroutine(RepeatLight());
-
                     }
-                    // 조건에 따라 플레이어의 마력을 채움
-                    // 타일의 충전횟수가 남아있고 TileAttribute 컴포넌트가 타일에 붙어있어야됨
-                    if (lightCnt > 0 && this.GetComponent<TileAttribute>() != null) 
+                    else if (lightCnt > 0 && isRepeatCo)
                     {
-                        // 회복시켜야 하는 수치
-                        int charge = 2;
-
-                        if (lightCnt < 4) { charge = 1; }
-
-                        collision.GetComponent<PlayerMove>().UpdatePlayerMana(this.GetComponent<TileAttribute>().type, charge);
+                        isManaUpdate = true;
+                        isLight = true;
                     }
                 }
             }
@@ -170,11 +166,25 @@ public class TileColiderCheck : MonoBehaviour
         float al = 0f;
         float bl = 0f;
 
+        isManaUpdate = true;
+
         while (true)
         {
             // 알파값을 올려서 타일에 색이 올라오는 것처럼 연출함
             if (isLight && lightCnt > 0)
             {
+                if (isManaUpdate && this.GetComponent<TileAttribute>() != null)
+                {
+                    // 회복시켜야 하는 수치
+                    int charge = 2;
+
+                    if (lightCnt < 4) { charge = 1; }
+
+                    player.GetComponent<PlayerMove>().UpdatePlayerMana(this.GetComponent<TileAttribute>().type, charge);
+
+                    isManaUpdate = false;
+                }
+
                 if (al < ((float)lightCnt / (float)maxLightCnt) * 255f)
                 {
                     al += 5f;
@@ -197,7 +207,6 @@ public class TileColiderCheck : MonoBehaviour
 
                 if (lightCnt < 1)
                 {
-                    //greyTileSpr.color -= new Color(3f, 3f, 3f, 0f);
                     bl += -0.05f;
                     greyTileSpr.material.SetFloat("_BloomPlus", bl);
                 }
