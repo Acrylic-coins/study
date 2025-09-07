@@ -735,7 +735,7 @@ public class PlayerMove : MonoBehaviour
         else
         {
             t = type;
-            Debug.Log(t);
+            //Debug.Log(t);
         }
 
         // 해당 속성의 마력 수치가 999를 넘어가면 999로 고정
