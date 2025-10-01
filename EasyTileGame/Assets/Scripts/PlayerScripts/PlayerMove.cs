@@ -1,3 +1,4 @@
+using Mono.Cecil;
 using NUnit.Framework;
 using System;
 using System.Collections;
@@ -41,14 +42,20 @@ public class PlayerMove : MonoBehaviour
     private List<State> stateList = new List<State>();
     // 현재 플레이어와 겹치고 있는 오브젝트들의 모음
     private List<Collider2D> colResultList = new List<Collider2D>();
+    // 속성별 특징을 검색하기 위한 리스트
+    private List<PlayerSkill> standardPlayerSkillList = new List<PlayerSkill>();
     // 사용해야할 스킬을 저장해둔 리스트. 최대 2개까지 가능하다.
     private List<string> skillStateList = new List<string>();
+    // 현재 어떤 속성의 기술을 써야하는지 기록되어있음
+    private Constant.ElementType eleBuffer = Constant.ElementType.NONE;
+    private String currentPressSkillKey = "";
 
     private Coroutine stateListCo;  // 상태를 처리하는 코루틴
     private Coroutine moveStateCo;  // 이동 상태를 실행하는 코루틴
     private Coroutine moveSkillStateCo; // 이동 스킬 상태를 실행하는 코루틴
     private Coroutine attackSkillStateCo; // 공격 스킬 상태를 실행하는 코루틴
     private Coroutine checkCoordCo; // 플레이어가 현재 어느 타일에 있는지 확인하는 코루틴
+    private Coroutine pressSkillKeyCo;  // 플레이어가 현재 어느 속성 키를 누르고 있는지 확인하는 코루틴
 
     private Animator playerSprAnime;
 
@@ -64,7 +71,7 @@ public class PlayerMove : MonoBehaviour
     private int endCoordX;  // 플레이어가 목표로 하는 X좌표 위치
     private int endCoordY;  // 플레이어가 목표로 하는 Y좌표 위치
 
-    private int moveSpeed = 100;    // 플레이어의 이동속도. 기본속도는 100이다.
+    private int moveSpeed = 10;    // 플레이어의 이동속도. 기본속도는 100이다.
 
     private int temSpriteCount = 0; // 현재 사용중인 2d텍스쳐의 스프라이트 개수
 
@@ -117,6 +124,7 @@ public class PlayerMove : MonoBehaviour
         }
 
         checkCoordCo = StartCoroutine(CheckPlayerCoord());
+        pressSkillKeyCo = StartCoroutine(PressSkillKeyCorutine());
     }
 
     // 스킬을 생성하기 위한 함수
@@ -129,6 +137,21 @@ public class PlayerMove : MonoBehaviour
         string type = "";
         // 스킬 관련 정보가 csv 파일 몇 라인에 있는 지 알기 위함
         int ind = -1;
+        // ElementType 열거형에 총 몇개의 상태가 있는지 알기 위함
+        int enumInd = Enum.GetValues(typeof(Constant.ElementType)).Length;
+        // 속성별 특징 검색을 원활히 하기 위해 리스트로 정리
+        for (int i = 0; i < enumInd; i++)
+        {
+            // 열거형에 있는 상태들은 전부 대문자로 처리했으니, 앞글자를 뺀 나머지를 소문자로 바꿔줌
+            // ToLowerInvariant()는 ToLower랑 다르게 문화권과 독립된 중립적인 규칙을 따르므로 어느 문화권이든 동일한 소문자를 표기
+            // --> ToLower를 사용할 시, 다른 문화권에서는 표기하는 소문자가 다르게 될 수 있음
+            string txt = ((Constant.ElementType)i).ToString().Substring(0,1)
+                + ((Constant.ElementType)i).ToString().Substring(1).ToLowerInvariant();
+            // PlayerSkill의 서브 클래스 중에서 해당 클래스명을 지닌 것이 있는지 확인
+            var t = TypeFinder.FindDerivedType<PlayerSkill>(txt + "Skill");
+            // 확인된 서브클래스들만 리스트에 저장
+            if (t != null) { standardPlayerSkillList.Add(Activator.CreateInstance(t) as PlayerSkill); }
+        }
 
         // 스킬 개수만큼 차례로 정보를 불러옴
         for (int i = 0; i < skillList.Count; i++)
@@ -146,7 +169,7 @@ public class PlayerMove : MonoBehaviour
                 // ---------------------------------빈 껍데기뿐인 클래스에 스킬 정보를 입력-------------------------------------------------------
                 // -------------------------------------------------------------------------------------------------------------------------------
                 // 스킬의 속성을 갱신. 비교할 때 문자는 전부 대문자로 바꿔줘야함
-                cl.elementType = (Constant.ElementType)Enum.Parse(typeof(Constant.ElementType), skillList[i]["PlayerSkillElementType"].ToUpper());
+                cl.elementType = (Constant.ElementType)Enum.Parse(typeof(Constant.ElementType), skillList[i]["PlayerSkillElementType"].ToUpperInvariant());
                 // 스킬의 이름을 갱신
                 cl.skillName = skillList[i]["PlayerSkillName"];
                 // 스킬의 발동키를 갱신
@@ -213,43 +236,188 @@ public class PlayerMove : MonoBehaviour
             stateListCo = StartCoroutine(StateProcess());
         }
     }
+
+    // 기술 키를 누르거나 떼면 호출되는 함수
     public void OnSKILL(InputAction.CallbackContext ctx)
     {
-        // 이동가능한 상태가 아니면 즉시 반환
-        if (!player.isPlayerReady) { return; }
-        // 키를 뗄 때는 즉시 반환
+        //이동가능한 상태가 아니면 즉시 반환
+        if(!player.isPlayerReady) { return; }
+        // 키를 떼는 경우는 즉시반환
         if (ctx.action.WasReleasedThisFrame()) { return; }
-        // 상태를 이미 1개 저장해두었다면 즉시 반환. 추가로 선입력 불가능
-        if (stateList.Count >= 2) { return; }
 
-        // 발동키에 맞는 스킬이 리스트 몇번째 인덱스에 있는지 찾음 
-        int inx = skillList.FindIndex(x => x["PlayerSkillActiveKey"].Equals(ctx.control.displayName));
-        // 스킬 코드번호 (int형 아님)
-        string skillNum = "";
-
-        // 최근에 누른(뗀X) 버튼이 스킬 발동키일 때 
-        if (inx != -1)
+        //키가 눌리면, 누른 키가 속성 키인지, 기술 키인지 확인을 함
+        if (ctx.action.WasPressedThisFrame())
         {
-            // 스킬 번호를 가져옴
-            skillNum = skillList[inx]["PlayerSkillCode"];
-            // 스킬에 필요한 마나를 충분히 가지고 있는지 확인(없으면 반환)
-
-            // 상태 리스트에 '스킬'을 추가
-            stateList.Add(State.SKILL);
-            // 스킬 상태 리스트에 '스킬 코드번호' 추가
-            skillStateList.Add(skillNum);
+            // 만약 누른 키가 스킬 키 일 때
+            // 누른 스킬키가 무엇인지 저장함
+            currentPressSkillKey = ctx.control.displayName;
+            Debug.Log(currentPressSkillKey);
+            // 반환
+            return;
         }
-        else { return; }
-
-        // 상태 처리 코루틴이 이미 발동중이면 코루틴을 실행하지 않는다.
-        if (!isStateProcess)
-        {
-            // 상태 처리 코루틴을 발동시킨다.
-            stateListCo = StartCoroutine(StateProcess());
-        }
-
-        return;
     }
+
+    // 속성 키를 누르거나 떼면 호출되는 함수
+    public void OnELEMENT(InputAction.CallbackContext ctx)
+    {
+        //이동가능한 상태가 아니면 즉시 반환
+        if (!player.isPlayerReady) { return; }
+        // 키를 떼는 경우는 즉시반환
+        if (ctx.action.WasReleasedThisFrame()) { return; }
+
+        // 누른 키랑 속성 키들이랑 대조
+        for (int i = 0; i < standardPlayerSkillList.Count; i++)
+        {
+            // 속성을 찾았을 때
+            if (ctx.control.displayName.Equals(standardPlayerSkillList[i].eleSkillKey))
+            {
+                // 버퍼에 해당 속성을 저장함
+                eleBuffer = standardPlayerSkillList[i].elementType;
+                Debug.Log(eleBuffer);
+                // 반환
+                return;
+            }
+        }
+    }
+
+    IEnumerator PressSkillKeyCorutine()
+    {
+        string temCurrentPressSkillKey = "";
+        int frameCount = 0;
+        while(true)
+        {
+            // 최근 누른 스킬키가 기록된 키와 다르면 키 갱신. 이후, 두 키가 같다는 전제하에 2프레임 후 해당 키 기록을 초기화함
+            if (!currentPressSkillKey.Equals(""))
+            {
+                if (!temCurrentPressSkillKey.Equals(currentPressSkillKey))
+                {
+                    temCurrentPressSkillKey = currentPressSkillKey;
+                    frameCount = 2;
+                }
+            }
+
+            // 프레임 카운트를 세고 있다면 매 프레임마다 1씩 감소시킴
+            if (frameCount > 0) { frameCount--; }
+            // 프레임 카운트가 0이 되면 기록해둔 스킬 키를 초기화함
+            else if (frameCount <= 0) { temCurrentPressSkillKey = ""; currentPressSkillKey = ""; }
+
+            // 만약 버퍼에 속성이 있고, 최근 누른 스킬키가 무엇인지 있다면 스킬 발동
+            if (eleBuffer != Constant.ElementType.NONE && !currentPressSkillKey.Equals(""))
+            {
+                // 스킬 키 초기화
+                frameCount = 0;
+                //eleBuffer = Constant.ElementType.NONE;
+
+                // 선입력 상태를 이미 1개 저장해두었다면 즉시 스킵.
+                if (stateList.Count >= 2) { continue; }
+
+                // 발동키에 맞는 스킬이 리스트 몇번째 인덱스에 있는지 찾음 
+                int inx = skillList.
+                    FindIndex(x => x["PlayerSkillActiveKey"].Equals(temCurrentPressSkillKey) 
+                                && x["PlayerSkillElementType"].ToUpperInvariant().Equals(eleBuffer.ToString()));
+                // 스킬 코드번호 (int형 아님)
+                string skillNum = "";
+
+                // 최근에 누른(뗀X) 버튼이 스킬 발동키가 맞을 때
+                if (inx != -1)
+                {
+                    // 스킬 번호를 가져옴
+                    skillNum = skillList[inx]["PlayerSkillCode"];
+                    // 스킬에 필요한 마나를 충분히 가지고 있는지 확인(없으면 반환)
+
+                    // 상태 리스트에 '스킬'을 추가
+                    stateList.Add(State.SKILL);
+                    // 스킬 상태 리스트에 '스킬 코드번호' 추가
+                    skillStateList.Add(skillNum);
+                }
+                else { continue; }
+
+                // 상태 처리 코루틴이 이미 발동중이면 코루틴을 실행하지 않는다.
+                if (!isStateProcess)
+                {
+                    // 상태 처리 코루틴을 발동시킨다.
+                    stateListCo = StartCoroutine(StateProcess());
+                }
+            }
+            yield return null;
+        }
+    }
+
+
+    //public void OnSKILL2(InputAction.CallbackContext ctx)
+    //{
+    //    // 이동가능한 상태가 아니면 즉시 반환
+    //    if (!player.isPlayerReady) { return; }
+    //    // 키를 뗄 때는 즉시 반환
+    //    if (ctx.action.WasReleasedThisFrame()) { return; }
+    //    // 상태를 이미 1개 저장해두었다면 즉시 반환. 추가로 선입력 불가능
+    //    if (stateList.Count >= 2) { return; }
+
+    //    // 발동키에 맞는 스킬이 리스트 몇번째 인덱스에 있는지 찾음 
+    //    int inx = skillList.FindIndex(x => x["PlayerSkillActiveKey"].Equals(ctx.control.displayName));
+    //    // 스킬 코드번호 (int형 아님)
+    //    string skillNum = "";
+
+    //    // 최근에 누른(뗀X) 버튼이 스킬 발동키일 때 
+    //    if (inx != -1)
+    //    {
+    //        // 스킬 번호를 가져옴
+    //        skillNum = skillList[inx]["PlayerSkillCode"];
+    //        // 스킬에 필요한 마나를 충분히 가지고 있는지 확인(없으면 반환)
+
+    //        // 상태 리스트에 '스킬'을 추가
+    //        stateList.Add(State.SKILL);
+    //        // 스킬 상태 리스트에 '스킬 코드번호' 추가
+    //        skillStateList.Add(skillNum);
+    //    }
+    //    else { return; }
+
+    //    // 상태 처리 코루틴이 이미 발동중이면 코루틴을 실행하지 않는다.
+    //    if (!isStateProcess)
+    //    {
+    //        // 상태 처리 코루틴을 발동시킨다.
+    //        stateListCo = StartCoroutine(StateProcess());
+    //    }
+
+    //    return;
+    //}
+    //public void OnSKILL2(InputAction.CallbackContext ctx)
+    //{
+    //    // 이동가능한 상태가 아니면 즉시 반환
+    //    if (!player.isPlayerReady) { return; }
+    //    // 키를 뗄 때는 즉시 반환
+    //    if (ctx.action.WasReleasedThisFrame()) { return; }
+    //    // 상태를 이미 1개 저장해두었다면 즉시 반환. 추가로 선입력 불가능
+    //    if (stateList.Count >= 2) { return; }
+
+    //    // 발동키에 맞는 스킬이 리스트 몇번째 인덱스에 있는지 찾음 
+    //    int inx = skillList.FindIndex(x => x["PlayerSkillActiveKey"].Equals(ctx.control.displayName));
+    //    // 스킬 코드번호 (int형 아님)
+    //    string skillNum = "";
+
+    //    // 최근에 누른(뗀X) 버튼이 스킬 발동키일 때 
+    //    if (inx != -1)
+    //    {
+    //        // 스킬 번호를 가져옴
+    //        skillNum = skillList[inx]["PlayerSkillCode"];
+    //        // 스킬에 필요한 마나를 충분히 가지고 있는지 확인(없으면 반환)
+
+    //        // 상태 리스트에 '스킬'을 추가
+    //        stateList.Add(State.SKILL);
+    //        // 스킬 상태 리스트에 '스킬 코드번호' 추가
+    //        skillStateList.Add(skillNum);
+    //    }
+    //    else { return; }
+
+    //    // 상태 처리 코루틴이 이미 발동중이면 코루틴을 실행하지 않는다.
+    //    if (!isStateProcess)
+    //    {
+    //        // 상태 처리 코루틴을 발동시킨다.
+    //        stateListCo = StartCoroutine(StateProcess());
+    //    }
+
+    //    return;
+    //}
 
     // stateList에 저장된 상태를 입력 순서대로 발동시킨다.
     IEnumerator StateProcess()
@@ -346,7 +514,8 @@ public class PlayerMove : MonoBehaviour
         float moveX = 0f;
         float moveY = 0f;
         // 이동속도에 따른 한 칸 이동에 걸리는 시간
-        float moveTime = 100f / (moveSpeed * 3.5f);
+        float moveTime = CalMoveTermTime(moveSpeed);
+        //Debug.Log(moveTime);
         // 현재 이동 비율
         float moveRate = 0f;
         // 시작지점과 목표지점 사이의 비율을 나타냄
@@ -389,6 +558,7 @@ public class PlayerMove : MonoBehaviour
             yield return oneFrame;
 
             moveRate += Time.deltaTime;
+            //Debug.Log(Time.deltaTime);
             rate = moveRate / moveTime;
             
             // 이동 진행비율중 20~80%까지는 플레이어가 어느 타일도 밟지 않은 상태임
@@ -447,7 +617,7 @@ public class PlayerMove : MonoBehaviour
         Vector3 end = Vector3.zero;
 
         // 이동속도에 따른 한 칸 이동에 걸리는 시간
-        float moveTime = 100f / (moveSpeed * 3.5f);
+        float moveTime = CalMoveTermTime(moveSpeed);
         // 현재 이동 비율
         float moveRate = 0f;
         // 각각 시작지점에서 매 프레임 얼만큼 x,y방향으로 이동해야 할지를 정하기 위함
@@ -751,5 +921,15 @@ public class PlayerMove : MonoBehaviour
 
         // ManaUI에 수치를 전달함
         manaUIScr.UpdateManaAmountText(t, playerManaDic[t]);
+    }
+
+    private float CalMoveTermTime(int moveS)
+    {
+        float t = 0.3f + ((float)(10 - moveS) * 0.3f);
+
+        if (t <= 0.1f) { t = 0.1f; }
+        else if (t >= 0.5f) { t = 0.5f; }
+
+        return t;
     }
 }

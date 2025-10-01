@@ -8,6 +8,7 @@ abstract public class PlayerSkill
 
     public string skillName { get; set; } // 스킬 이름. 
     public string activateKey { get; set; }    // 스킬을 사용하기 위한 키보드 키
+    public string eleSkillKey { get; set; }
     public string playerSkillSpriteTrigger { get; set; }    // 스킬 스프라이트를 변경하기 위한 변수 이름
 
     public int skillMana { get; set; }    // 스킬 소모 마력
@@ -25,6 +26,7 @@ public class IceSkill : PlayerSkill
 {
     public IceSkill()
     {
+        eleSkillKey = "2";
         elementType = Constant.ElementType.ICE;
     }
 }
@@ -34,6 +36,7 @@ public class FireSkill : PlayerSkill
 {
     public FireSkill()
     {
+        eleSkillKey = "1";
         elementType = Constant.ElementType.FIRE;
     }
 }
@@ -43,6 +46,7 @@ public class ThunderSkill : PlayerSkill
 {
     public ThunderSkill()
     {
+        eleSkillKey = "A";
         elementType = Constant.ElementType.THUNDER;
     }
 }
@@ -52,6 +56,7 @@ public class PlantSkill : PlayerSkill
 {
     public PlantSkill()
     {
+        eleSkillKey = "Z";
         elementType = Constant.ElementType.PLANT;
     }
 }
@@ -61,6 +66,7 @@ public class MetalSkill : PlayerSkill
 {
     public MetalSkill()
     {
+        eleSkillKey = "W";
         elementType = Constant.ElementType.METAL;
     }
 }
@@ -70,6 +76,7 @@ public class SoilSkill : PlayerSkill
 {
     public SoilSkill()
     {
+        eleSkillKey = "Q";
         elementType = Constant.ElementType.SOIL;
     }
 }
@@ -79,6 +86,7 @@ public class DarkSkill : PlayerSkill
 {
     public DarkSkill()
     {
+        eleSkillKey = "S";
         elementType = Constant.ElementType.DARK;
     }
 }
@@ -88,6 +96,7 @@ public class LightSkill : PlayerSkill
 {
     public LightSkill()
     {
+        eleSkillKey = "X";
         elementType = Constant.ElementType.LIGHT;
     }
 }
